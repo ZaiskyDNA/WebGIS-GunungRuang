@@ -406,11 +406,11 @@ export default function Home() {
           <Card>
             <CardTitle icon="🛡️">Zona Bahaya (KRB)</CardTitle>
             <div className="space-y-3">
-              {krbZones.map(({ color, name, radius, desc, bgLight,labelColor}) => (
+              {krbZones.map(({ color, name, radius, desc, bgLight,textColor}) => (
                 <div key={name} className={`${bgLight} rounded-lg p-3 border-l-4 ${color.replace('bg-', 'border-')}`}>
                   <div className="flex items-start justify-between gap-2">
-                    <div className={`text-xs font-semibold ${labelColor}`}>{name}</div>
-                    <span className={`flex-shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/70 ${labelColor}`}>
+                    <div className={`text-xs font-semibold ${textColor}`}>{name}</div>
+                    <span className={`flex-shrink-0 text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/70 ${textColor}`}>
                       {radius}
                     </span>
                   </div>
