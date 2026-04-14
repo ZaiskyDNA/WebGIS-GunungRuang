@@ -27,6 +27,11 @@ const Marker = dynamic(
   { ssr: false }
 );
 
+const Polygon = dynamic(
+  () => import('react-leaflet').then(mod => mod.Polygon),
+  { ssr: false }
+);
+
 const Popup = dynamic(
   () => import('react-leaflet').then(mod => mod.Popup),
   { ssr: false }
@@ -68,6 +73,24 @@ export default function MapPraBencana() {
         iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
       }),
     };
+  }, []);
+
+  const polygonArea = useMemo(() => {
+    return [
+      [4.8, 120.5],
+      [5.3, 122.0],
+      [4.6, 123.8],
+      [3.8, 124.8],
+      [2.9, 125.5],
+      [1.3, 125.5],
+      [0.4, 124.6],
+      [0.5, 123.0],
+      [0.8, 121.8],
+      [1.1, 120.8],
+      [2.7, 119.8],
+      [4.5, 119.8],
+      
+    ] as [number, number][];
   }, []);
 
   useEffect(() => {
@@ -152,6 +175,22 @@ export default function MapPraBencana() {
           pathOptions={{ fillColor: 'white', color: 'darkgray', fillOpacity: 0.15 }}
           radius={7000}
         />
+
+        {/* Area Terdampak Erupsi 2024 — Poligon Hitam */}
+        <Polygon
+          positions={polygonArea}
+          pathOptions={{
+            fillColor: 'black',
+            color: '#000000',
+            fillOpacity: 0.18,
+            opacity: 0.9,
+            weight: 2,
+          }}
+        >
+          <Popup>
+            <strong>Area Terdampak Erupsi 2024</strong>
+          </Popup>
+        </Polygon>
 
         {/* Marker Puncak Gunung Ruang */}
         <Marker position={volcanoPosition} icon={icons.volcano}>

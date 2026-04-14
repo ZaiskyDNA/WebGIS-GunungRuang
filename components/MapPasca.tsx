@@ -5,9 +5,12 @@ import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Kita menerima 'radius' dan 'color' dari halaman utama untuk simulasinya
-export default function MapPasca({ radius, colorHex }: { radius: number, colorHex: string }) {
+// Kita menerima 'currentRadius' sebagai string (misal "2 KM") dan 'colorHex' untuk warna lingkaran
+export default function MapPasca({ currentRadius, colorHex = "#ff4444" }: { currentRadius: string, colorHex?: string }) {
   const volcanoPosition: [number, number] = [2.30597, 125.36680];
+
+  // Konversi string radius ke number (ambil angka pertama dari string)
+  const radiusNumber = parseInt(currentRadius.split(' ')[0]) * 1000; // Konversi KM ke meter
 
   const volcanoIcon = new L.Icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
@@ -29,11 +32,11 @@ export default function MapPasca({ radius, colorHex }: { radius: number, colorHe
         />
         
         {/* Lingkaran Simulasi yang berubah ukuran & warna secara dinamis */}
-        {radius > 0 && (
+        {radiusNumber > 0 && (
           <Circle
             center={volcanoPosition}
             pathOptions={{ fillColor: colorHex, color: colorHex, fillOpacity: 0.4 }}
-            radius={radius}
+            radius={radiusNumber}
           />
         )}
 
