@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar";
-import Script from "next/script";
+import VoiceflowAI from "../components/VoicefLow"; 
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,22 +21,9 @@ export default function RootLayout({
       <body className={inter.className}>
         <Navbar />
         {children}
-
-        {/* --- KONFIGURASI CHATBASE AI --- */}
-        <Script id="chatbase-config" strategy="lazyOnload">
-          {`
-            window.chatbaseConfig = {
-              chatbotId: "GANTI_DENGAN_ID_CHATBOT_ANDA_DI_SINI",
-            }
-          `}
-        </Script>
-
-        <script
-          src="https://www.chatbase.co/embed.min.js"
-          data-chatbot-id="0T8bLsCVsASnwDQK_aggH"
-          data-domain="www.chatbase.co"
-          defer
-        ></script>
+        
+        {/*Panggil AI Voiceflow*/}
+        <VoiceflowAI /> 
       </body>
     </html>
   );
