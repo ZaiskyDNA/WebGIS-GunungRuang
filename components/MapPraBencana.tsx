@@ -6,220 +6,143 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../lib/supabase';
 
-// Import komponen react-leaflet secara dinamis untuk menghindari SSR
-const MapContainer = dynamic(
-  () => import('react-leaflet').then(mod => mod.MapContainer),
-  { ssr: false }
-);
+// Import komponen react-leaflet secara dinamis
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
+const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false });
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
+const Tooltip = dynamic(() => import('react-leaflet').then(mod => mod.Tooltip), { ssr: false });
 
-const TileLayer = dynamic(
-  () => import('react-leaflet').then(mod => mod.TileLayer),
-  { ssr: false }
-);
+// --- DATA STATIK ---
+const AIRPORTS = [
+  { name: "Bandara Sam Ratulangi Manado", lat: 1.550487, lng: 124.925372 },
+  { name: "Bandara Taman Bung Karno Siau", lat: 2.650466, lng: 125.423891 },
+  { name: "Bandara Naha Tahuna", lat: 3.689334, lng: 125.527484 },
+  { name: "Bandara Djalaludin Gorontalo", lat: 0.642445, lng: 122.848305 },
+];
 
-const Circle = dynamic(
-  () => import('react-leaflet').then(mod => mod.Circle),
-  { ssr: false }
-);
+const DROP_POINTS = [
+  { name: "Kantor Gubernur Sulut (Drop Point Bantuan)", lat: 1.470085, lng: 124.844832 }
+];
 
-const Marker = dynamic(
-  () => import('react-leaflet').then(mod => mod.Marker),
-  { ssr: false }
-);
-
-const Polygon = dynamic(
-  () => import('react-leaflet').then(mod => mod.Polygon),
-  { ssr: false }
-);
-
-const Popup = dynamic(
-  () => import('react-leaflet').then(mod => mod.Popup),
-  { ssr: false }
-);
+const GATHERING_POINTS = [
+  { name: "Kantor Desa Apengsala (Pusat)", lat: 2.381348, lng: 125.389983, elev: "47.0m", type: "central" },
+  { name: "Kantor Desa Lumbo (Pusat)", lat: 2.344265, lng: 125.418412, elev: "173.8m", type: "central" },
+  { name: "Gereja GMIST Apengsara", lat: 2.380443, lng: 125.391550, elev: "66.9m", type: "temp" },
+  { name: "Gereja GMIST Boto", lat: 2.355787, lng: 125.386658, elev: "159.8m", type: "temp" },
+  { name: "Gereja GMIST Mohongsawang", lat: 2.374824, lng: 125.379567, elev: "11.7m", type: "temp" },
+  { name: "Gereja GPDI Boto", lat: 2.356686, lng: 125.389331, elev: "200.5m", type: "temp" },
+  { name: "Kantor Camat Tagulandang Utara", lat: 2.352551, lng: 125.429462, elev: "173.2m", type: "temp" },
+  { name: "SDN Inpres Mohongsawang", lat: 2.380080, lng: 125.385743, elev: "10.6m", type: "temp" },
+  { name: "SMK Negeri 1 Tagulandang Utara", lat: 2.346008, lng: 125.422166, elev: "166.4m", type: "temp" },
+  { name: "SPPG Tagulandang Induk", lat: 2.328525, lng: 125.393735, elev: "26.8m", type: "temp" },
+  { name: "SPPG Tagulandang Selatan", lat: 2.318665, lng: 125.437831, elev: "7.5m", type: "temp" },
+  { name: "SPPG Tagulandang Utara", lat: 2.368347, lng: 125.418561, elev: "6.1m", type: "temp" }
+];
 
 export default function MapPraBencana() {
+  // Center regional agar zoom out terlihat dari Manado - Tahuna
+  const regionalCenter: [number, number] = [2.2, 124.5]; 
   const volcanoPosition: [number, number] = [2.30597, 125.36680];
-  const [evacuationPoints, setEvacuationPoints] = useState<{ id: number; lat: number; lng: number; name: string }[]>([]);
+  
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // ── Konfigurasi default icon Leaflet (penting untuk avoid error)
-  useEffect(() => {
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
-    L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-    });
-  }, []);
-
-  // ── Semua ikon WAJIB dibuat di dalam useMemo (client-only)
+  // ── Konfigurasi Ikon
   const icons = useMemo(() => {
     if (typeof window === 'undefined') return null;
+    const base = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-";
+    const shadow = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png";
+
     return {
-      custom: new L.Icon({
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
-      }),
-      volcano: new L.Icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
-      }),
-      user: new L.Icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34],
-      }),
+      volcano: new L.Icon({ iconUrl: base + 'red.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      airport: new L.Icon({ iconUrl: base + 'black.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      dropPoint: new L.Icon({ iconUrl: base + 'blue.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      centralShelter: new L.Icon({ iconUrl: base + 'gold.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      tempShelter: new L.Icon({ iconUrl: base + 'green.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      user: new L.Icon({ iconUrl: base + 'violet.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
     };
   }, []);
 
-  const polygonArea = useMemo(() => {
-    return [
-      [4.8, 120.5],
-      [5.3, 122.0],
-      [4.6, 123.8],
-      [3.8, 124.8],
-      [2.9, 125.5],
-      [1.3, 125.5],
-      [0.4, 124.6],
-      [0.5, 123.0],
-      [0.8, 121.8],
-      [1.1, 120.8],
-      [2.7, 119.8],
-      [4.5, 119.8],
-      
-    ] as [number, number][];
-  }, []);
+  const eruptionArea2024 = useMemo(() => [
+    [4.8, 120.5], [5.3, 122.0], [4.6, 123.8], [3.8, 124.8], [2.9, 125.5],
+    [1.3, 125.5], [0.4, 124.6], [0.5, 123.0], [0.8, 121.8], [1.1, 120.8],
+    [2.7, 119.8], [4.5, 119.8]
+  ] as [number, number][], []);
 
   useEffect(() => {
-    // Gunakan setTimeout untuk memastikan DOM siap
-    const timer = setTimeout(() => {
-      setIsMounted(true);
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-
-    // 1. Ambil Data Posko Evakuasi dari Supabase
-    async function fetchPoints() {
-      const { data } = await supabase.from('view_evacuation_points').select('*');
-      if (data) setEvacuationPoints(data);
-    }
-    fetchPoints();
-
-    // 2. Minta Izin Lokasi Pengguna (Geolocation)
+    setIsMounted(true);
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation([position.coords.latitude, position.coords.longitude]);
-        },
-        (error) => {
-          console.warn('Akses lokasi ditolak atau gagal:', error.message);
-        }
+        (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
+        () => console.warn('Akses lokasi ditolak')
       );
     }
-  }, [isMounted]);
+  }, []);
 
-  // Jangan render map di server — cegah hydration mismatch
   if (!isMounted || !icons) {
-    return (
-      <div className="w-full h-[400px] md:h-[500px] rounded-xl bg-gray-200 animate-pulse flex items-center justify-center text-sm text-gray-500">
-        Memuat Peta...
-      </div>
-    );
+    return <div className="w-full h-[450px] md:h-[650px] rounded-xl bg-gray-100 animate-pulse flex items-center justify-center">Memuat Peta Regional...</div>;
   }
 
   return (
-    <div className="w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-xl border-4 border-volcano-dark relative z-0">
+    <div className="w-full h-[450px] md:h-[650px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white relative z-0">
       <MapContainer
-        key="map-pra-bencana"
-        center={volcanoPosition}
-        zoom={12}
-        scrollWheelZoom={false}
-        style={{ height: '100%', width: '100%', zIndex: 0 }}
+        center={regionalCenter}
+        zoom={7} // Zoom out regional
+        scrollWheelZoom={true}
+        style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution='&copy; OpenStreetMap'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* KRB III — Radius 2,5 km (merah) */}
-        <Circle
-          center={volcanoPosition}
-          pathOptions={{ fillColor: 'red', color: 'darkred', fillOpacity: 0.3 }}
-          radius={2500}
-        />
-
-        {/* KRB II — Radius 5 km (oranye) */}
-        <Circle
-          center={volcanoPosition}
-          pathOptions={{ fillColor: 'orange', color: 'darkorange', fillOpacity: 0.15 }}
-          radius={5000}
-        />
-
-        {/* Bebas Aktivitas — Radius 6 km (kuning) */}
-        <Circle
-          center={volcanoPosition}
-          pathOptions={{ fillColor: 'yellow', color: '#b8960c', fillOpacity: 0.15 }}
-          radius={6000}
-        />
-
-        {/* KRB I — Radius 7 km (abu-abu) */}
-        <Circle
-          center={volcanoPosition}
-          pathOptions={{ fillColor: 'white', color: 'darkgray', fillOpacity: 0.15 }}
-          radius={7000}
-        />
-
-        {/* Area Terdampak Erupsi 2024 — Poligon Hitam */}
+        {/* Area Erupsi 2024 */}
         <Polygon
-          positions={polygonArea}
-          pathOptions={{
-            fillColor: 'black',
-            color: '#000000',
-            fillOpacity: 0.18,
-            opacity: 0.9,
-            weight: 2,
-          }}
-        >
-          <Popup>
-            <strong>Area Terdampak Erupsi 2024</strong>
-          </Popup>
-        </Polygon>
+          positions={eruptionArea2024}
+          pathOptions={{ fillColor: 'orange', color: 'darkorange', fillOpacity: 0.15, weight: 1 }}
+        />
 
-        {/* Marker Puncak Gunung Ruang */}
-        <Marker position={volcanoPosition} icon={icons.volcano}>
-          <Popup>
-            <strong>Gunung Ruang</strong>
-            <br />
-            Pusat Radius Bahaya
-            <br />
-            <span style={{ color: '#9B0F06', fontWeight: 600 }}>Status: Level II — Waspada</span>
-          </Popup>
-        </Marker>
+        {/* 1. Bandara Terdampak */}
+        {AIRPORTS.map((ap, i) => (
+          <Marker key={`ap-${i}`} position={[ap.lat, ap.lng]} icon={icons.airport}>
+            <Popup><strong>✈️ {ap.name}</strong><br/>Status: Terdampak Penerbangan</Popup>
+            <Tooltip direction="top">Bandara</Tooltip>
+          </Marker>
+        ))}
 
-        {/* Marker Posko Evakuasi dari Supabase */}
-        {evacuationPoints.map((point) => (
-          <Marker key={point.id} position={[point.lat, point.lng]} icon={icons.custom}>
+        {/* 2. Drop Point Manado */}
+        {DROP_POINTS.map((dp, i) => (
+          <Marker key={`dp-${i}`} position={[dp.lat, dp.lng]} icon={icons.dropPoint}>
+            <Popup><strong>📦 {dp.name}</strong><br/>Pusat Distribusi Bantuan Utama</Popup>
+          </Marker>
+        ))}
+
+        {/* 3 & 4. Titik Kumpul Terpusat & Sementara */}
+        {GATHERING_POINTS.map((gp, i) => (
+          <Marker 
+            key={`gp-${i}`} 
+            position={[gp.lat, gp.lng]} 
+            icon={gp.type === 'central' ? icons.centralShelter : icons.tempShelter}
+          >
             <Popup>
-              <strong>{point.name}</strong>
-              <br />
-              Posko Evakuasi
+              <strong>{gp.type === 'central' ? '🏢' : '⛺'} {gp.name}</strong><br/>
+              Elevasi: {gp.elev}<br/>
+              Kategori: {gp.type === 'central' ? 'Pusat' : 'Sementara'}
             </Popup>
           </Marker>
         ))}
 
-        {/* Marker Lokasi Pengguna (jika geolocation diizinkan) */}
+        {/* Gunung Ruang */}
+        <Marker position={volcanoPosition} icon={icons.volcano}>
+          <Popup><strong>🌋 Gunung Ruang</strong><br/>Pusat Erupsi</Popup>
+        </Marker>
+
+        {/* Lokasi User */}
         {userLocation && (
           <Marker position={userLocation} icon={icons.user}>
-            <Popup>
-              <strong>Lokasi Anda Saat Ini</strong>
-            </Popup>
+            <Popup>Lokasi Anda</Popup>
           </Marker>
         )}
       </MapContainer>
