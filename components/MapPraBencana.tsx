@@ -1,18 +1,11 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import dynamic from 'next/dynamic';
+// Kita impor semua komponen langsung (termasuk LayersControl) agar lebih rapi
+import { MapContainer, TileLayer, Marker, Polygon, Popup, Tooltip, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../lib/supabase';
-
-// Import komponen react-leaflet secara dinamis
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const Tooltip = dynamic(() => import('react-leaflet').then(mod => mod.Tooltip), { ssr: false });
 
 // --- DATA STATIK ---
 const AIRPORTS = [
@@ -64,7 +57,7 @@ export default function MapPraBencana() {
       user: new L.Icon({ iconUrl: base + 'violet.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
     };
   }, []);
-
+  
   const eruptionArea2024 = useMemo(() => [
     [4.8, 120.5], [5.3, 122.0], [4.6, 123.8], [3.8, 124.8], [2.9, 125.5],
     [1.3, 125.5], [0.4, 124.6], [0.5, 123.0], [0.8, 121.8], [1.1, 120.8],
@@ -93,10 +86,36 @@ export default function MapPraBencana() {
         scrollWheelZoom={true}
         style={{ height: '100%', width: '100%' }}
       >
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+        {/* ==============================================
+            KONTROL LAYER / OPSI GANTI PETA
+            ============================================== */}
+        <LayersControl position="topright">
+          
+          {/* OPSI 1: Peta Standar (OpenStreetMap) - Default */}
+          <LayersControl.BaseLayer checked name="Peta Standar (OSM)">
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+          </LayersControl.BaseLayer>
+
+          {/* OPSI 2: Citra Satelit (Esri World Imagery) */}
+          <LayersControl.BaseLayer name="Citra Satelit (Esri)">
+            <TileLayer
+              attribution='&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
+          </LayersControl.BaseLayer>
+
+          {/* OPSI 3: Peta Topografi (OpenTopoMap) */}
+          <LayersControl.BaseLayer name="Peta Topografi (Lereng)">
+            <TileLayer
+              attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+              url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+            />
+          </LayersControl.BaseLayer>
+
+        </LayersControl>
 
         {/* Area Erupsi 2024 */}
         <Polygon

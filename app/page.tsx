@@ -246,8 +246,6 @@ export default function Home() {
           {[
             { num: '725 mdpl', lbl: 'Ketinggian', sub: 'Tipe Stratovolcano' },
             { num: '±12.000', lbl: 'Jiwa Rentan', sub: 'Dalam Radius 7 KM' },
-            { num: '2 Desa', lbl: 'Area Berbahaya', sub: 'Laingpatehi & Pumpente' },
-            { num: '4x5 KM', lbl: 'Luas Pulau', sub: 'Area pulau erupsi' },
             { num: 'Tsunami', lbl: 'Potensi Ikutan', sub: 'Akibat longsoran laut' },
           ].map(({ num, lbl, sub }, i) => (
             <div key={i} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
@@ -268,13 +266,14 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-2">
               <div>
                 <h3 className="text-lg md:text-xl font-bold text-[#4a1511] flex items-center gap-2">
-                  <span>🗺️</span> Peta Zonasi & Fasilitas
+                  <span>🗺️</span> Peta Dampak Erupsi 2024
                 </h3>
                 <p className="text-xs font-medium text-gray-500">Pemetaan Titik Evakuasi & Area Rentan Bencana</p>
+                <p className="text-[10px] text-gray-400 mt-1">Sumber Data : BMKG 2024</p>
               </div>
               <div className="flex items-center gap-2 bg-orange-50 px-3 py-1.5 rounded-xl border border-orange-100 w-fit">
                 <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse"></span>
-                <span className="text-[10px] font-bold text-orange-800 uppercase tracking-widest">Delineasi 2024</span>
+                <span className="text-[10px] font-bold text-orange-800 uppercase tracking-widest">Area Sebaran Abu Vulkanik </span>
               </div>
             </div>
             

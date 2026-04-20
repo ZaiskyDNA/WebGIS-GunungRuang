@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Circle } from 'react-leaflet';
+// Tambahkan LayersControl di import
+import { MapContainer, TileLayer, Marker, Popup, Circle, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../lib/supabase';
@@ -9,8 +10,10 @@ import { supabase } from '../lib/supabase';
 export default function MapTanggap() {
   const volcanoPosition: [number, number] = [2.30597, 125.36680];
   const [points, setPoints] = useState<any[]>([]);
+  
+  // State untuk menyimpan HANYA SATU radius bahaya
+  const [radiusBahaya, setRadiusBahaya] = useState(7000);
 
-  // Menggunakan useMemo agar ikon hanya dimuat di Client-Side
   const icons = useMemo(() => {
     if (typeof window === 'undefined') return null;
     return {
@@ -28,11 +31,18 @@ export default function MapTanggap() {
   }, []);
 
   useEffect(() => {
-    async function fetchPoints() {
-      const { data } = await supabase.from('view_evacuation_points').select('*');
-      if (data) setPoints(data);
+    async function fetchData() {
+      // Ambil titik posko
+      const { data: poskoData } = await supabase.from('view_evacuation_points').select('*');
+      if (poskoData) setPoints(poskoData);
+
+      // Ambil radius bahaya tunggal dari database
+      const { data: statusData } = await supabase.from('volcano_status').select('*').eq('id', 1).single();
+      if (statusData && statusData.radius_bahaya) {
+        setRadiusBahaya(statusData.radius_bahaya);
+      }
     }
-    fetchPoints();
+    fetchData();
   }, []);
 
   if (!icons) return null;
@@ -41,23 +51,45 @@ export default function MapTanggap() {
     <div className="w-full h-full rounded-2xl overflow-hidden relative z-0">
       <MapContainer 
         center={volcanoPosition} 
-        zoom={13} 
+        zoom={12} 
         scrollWheelZoom={true} 
         style={{ height: '100%', width: '100%' }}
       >
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        {/* KONTROL LAYER / OPSI GANTI PETA */}
+        <LayersControl position="topright">
+          
+          {/* OPSI 1: Peta Standar (OpenStreetMap) - Default */}
+          <LayersControl.BaseLayer checked name="Peta Standar (OSM)">
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+          </LayersControl.BaseLayer>
+
+          {/* OPSI 2: Citra Satelit (Menggunakan Esri World Imagery - Gratis & Bagus) */}
+          <LayersControl.BaseLayer name="Citra Satelit (Esri)">
+            <TileLayer
+              attribution='&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP'
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            />
+          </LayersControl.BaseLayer>
+
+          {/* OPSI 3: Peta Topografi (OpenTopoMap) */}
+          <LayersControl.BaseLayer name="Peta Topografi (Lereng)">
+            <TileLayer
+              attribution='Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a>'
+              url="https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
+            />
+          </LayersControl.BaseLayer>
+
+        </LayersControl>
+
+        {/* SATU LINGKARAN RADIUS BAHAYA MERAH TEGAS */}
+        <Circle 
+          center={volcanoPosition} 
+          pathOptions={{ fillColor: 'red', color: 'darkred', fillOpacity: 0.2, weight: 2 }} 
+          radius={radiusBahaya} 
         />
-        
-        {/* KRB III — Radius 2,5 km (merah) */}
-        <Circle center={volcanoPosition} pathOptions={{ fillColor: 'red', color: 'darkred', fillOpacity: 0.2 }} radius={2500} />
-        {/* KRB II — Radius 5 km (oranye) */}
-        <Circle center={volcanoPosition} pathOptions={{ fillColor: 'orange', color: 'darkorange', fillOpacity: 0.15 }} radius={5000} />
-        {/* Bebas Aktivitas — Radius 6 km (kuning) */}
-        <Circle center={volcanoPosition} pathOptions={{ fillColor: 'yellow', color: '#b8960c', fillOpacity: 0.15 }} radius={6000} />
-        {/* KRB I — Radius 7 km (abu-abu) */}
-        <Circle center={volcanoPosition} pathOptions={{ fillColor: 'white', color: 'darkgray', fillOpacity: 0.15 }} radius={7000} />
 
         {/* Marker Gunung Ruang */}
         <Marker position={volcanoPosition} icon={icons.volcano}>
@@ -74,7 +106,6 @@ export default function MapTanggap() {
                 <div className={`text-xs font-bold mb-4 px-2 py-1 rounded inline-block ${p.status_logistik === 'Kritis' ? 'bg-red-50 text-red-600' : p.status_logistik === 'Menipis' ? 'bg-orange-50 text-orange-600' : 'bg-emerald-50 text-emerald-600'}`}>
                   Logistik: {p.status_logistik}
                 </div>
-                
                 <a 
                   href={`/tanggap-darurat/posko/${p.id}`}
                   className="block w-full text-center bg-[#4a1511] hover:bg-[#6b201a] text-white py-2 rounded-lg font-bold text-xs transition-colors shadow-sm"

@@ -1,290 +1,308 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase'; 
 
 export default function Dashboard() {
-  const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState<string | null>('');
-  
-  // State untuk status gunung (Admin)
-  const [currentLevel, setCurrentLevel] = useState<number>(2);
-  const [updatingAdmin, setUpdatingAdmin] = useState(false);
-  const [messageAdmin, setMessageAdmin] = useState('');
+  // ── STATE UNTUK TAB NAVIGASI ──
+  const [activeTab, setActiveTab] = useState<'admin' | 'relawan'>('admin');
 
-  // State untuk form Relawan
+  // ── STATE ADMIN (STATUS GUNUNG & RADIUS) ──
+  const [status, setStatus] = useState({ level: 2, name: 'Waspada', desc: '' });
+  const [radiusBahaya, setRadiusBahaya] = useState(7000);
+  const [isUpdatingAdmin, setIsUpdatingAdmin] = useState(false);
+
+  // ── STATE RELAWAN (UPDATE POSKO) ──
   const [poskos, setPoskos] = useState<any[]>([]);
-  const [selectedPosko, setSelectedPosko] = useState<string>('');
-  const [updatingRelawan, setUpdatingRelawan] = useState(false);
-  const [messageRelawan, setMessageRelawan] = useState('');
-  
-  // State untuk menampung isian form
-  const [formData, setFormData] = useState({
-    bayi: 0, anak: 0, dewasa: 0, lansia: 0,
-    beras_kg: 0, air_liter: 0, masker_box: 0,
+  const [selectedPoskoId, setSelectedPoskoId] = useState<string>('');
+  const [poskoData, setPoskoData] = useState({
+    current_refugees: 0,
+    beras_kg: 0,
+    air_liter: 0,
+    masker_box: 0,
     status_logistik: 'Aman'
   });
+  const [isUpdatingRelawan, setIsUpdatingRelawan] = useState(false);
 
+  // ── FETCH DATA AWAL ──
   useEffect(() => {
-    async function checkUser() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push('/login');
-      } else {
-        setUserEmail(session.user.email || 'Admin');
-        fetchCurrentStatus();
-        fetchPoskos();
+    async function fetchData() {
+      // Fetch Status Gunung & Radius
+      const { data: statusData } = await supabase.from('volcano_status').select('*').eq('id', 1).single();
+      if (statusData) {
+        setStatus({ level: statusData.level, name: statusData.name, desc: statusData.description });
+        if (statusData.radius_bahaya) setRadiusBahaya(statusData.radius_bahaya);
+      }
+
+      // Fetch Daftar Posko untuk Dropdown Relawan
+      const { data: poskoData } = await supabase.from('evacuation_points').select('id, name').order('name');
+      if (poskoData) {
+        setPoskos(poskoData);
       }
     }
-    checkUser();
-  }, [router]);
+    fetchData();
+  }, []);
 
-  // Ambil Data Status Gunung
-  async function fetchCurrentStatus() {
-    const { data } = await supabase.from('volcano_status').select('*').eq('id', 1).single();
-    if (data) setCurrentLevel(data.level);
-    setLoading(false);
-  }
-
-  // Ambil Data Daftar Posko untuk Dropdown
-  async function fetchPoskos() {
-    const { data } = await supabase.from('evacuation_points').select('*').order('name');
-    if (data) setPoskos(data);
-  }
-
-  // Fungsi Keluar (Logout)
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
-
-  // --- FUNGSI ADMIN ---
-  const handleUpdateStatus = async (level: number, name: string, description: string) => {
-    setUpdatingAdmin(true);
-    setMessageAdmin('');
-
-    const { error } = await supabase
-      .from('volcano_status')
-      .update({ level, name, description, updated_at: new Date().toISOString() })
-      .eq('id', 1);
-
-    if (error) setMessageAdmin(`Gagal memperbarui: ${error.message}`);
-    else {
-      setCurrentLevel(level);
-      setMessageAdmin(`Sukses! Status diubah ke Level ${level} (${name}).`);
+  // Fetch Data spesifik saat Relawan memilih Posko dari Dropdown
+  useEffect(() => {
+    async function fetchDetailPosko() {
+      if (!selectedPoskoId) return;
+      const { data } = await supabase.from('evacuation_points').select('*').eq('id', selectedPoskoId).single();
+      if (data) {
+        setPoskoData({
+          current_refugees: data.current_refugees || 0,
+          beras_kg: data.beras_kg || 0,
+          air_liter: data.air_liter || 0,
+          masker_box: data.masker_box || 0,
+          status_logistik: data.status_logistik || 'Aman'
+        });
+      }
     }
-    setUpdatingAdmin(false);
+    fetchDetailPosko();
+  }, [selectedPoskoId]);
+
+  // ── FUNGSI ADMIN: UPDATE STATUS GUNUNG ──
+  const handleUpdateStatus = async (newLevel: number, newName: string, newDesc: string) => {
+    setIsUpdatingAdmin(true);
+    const { error } = await supabase.from('volcano_status').update({
+      level: newLevel, name: newName, description: newDesc
+    }).eq('id', 1);
+
+    if (!error) {
+      setStatus({ level: newLevel, name: newName, desc: newDesc });
+      alert(`Status berhasil diubah menjadi Level ${newLevel} (${newName})!`);
+    } else {
+      alert("Gagal mengubah status.");
+    }
+    setIsUpdatingAdmin(false);
   };
 
-  // --- FUNGSI RELAWAN ---
-  // 1. Saat dropdown posko dipilih, isi form dengan data yang ada di database
-  const handlePoskoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const poskoId = e.target.value;
-    setSelectedPosko(poskoId);
+  // ── FUNGSI ADMIN: UPDATE RADIUS BAHAYA ──
+  const handleUpdateRadius = async () => {
+    setIsUpdatingAdmin(true);
+    const { error } = await supabase.from('volcano_status').update({
+      radius_bahaya: radiusBahaya
+    }).eq('id', 1);
+
+    if (!error) {
+      alert("Radius Bahaya berhasil diperbarui! Peta Tanggap Darurat telah menyesuaikan area bahaya.");
+    } else {
+      alert("Gagal memperbarui radius.");
+    }
+    setIsUpdatingAdmin(false);
+  };
+
+  // ── FUNGSI RELAWAN: UPDATE DATA POSKO ──
+  const handleUpdatePosko = async () => {
+    if (!selectedPoskoId) return alert("Pilih posko terlebih dahulu!");
+    setIsUpdatingRelawan(true);
     
-    const selected = poskos.find(p => p.id === poskoId);
-    if (selected) {
-      setFormData({
-        bayi: selected.bayi || 0,
-        anak: selected.anak || 0,
-        dewasa: selected.dewasa || 0,
-        lansia: selected.lansia || 0,
-        beras_kg: selected.beras_kg || 0,
-        air_liter: selected.air_liter || 0,
-        masker_box: selected.masker_box || 0,
-        status_logistik: selected.status_logistik || 'Aman'
-      });
+    const { error } = await supabase.from('evacuation_points').update({
+      current_refugees: poskoData.current_refugees,
+      beras_kg: poskoData.beras_kg,
+      air_liter: poskoData.air_liter,
+      masker_box: poskoData.masker_box,
+      status_logistik: poskoData.status_logistik
+    }).eq('id', selectedPoskoId);
+
+    if (!error) {
+      alert("Data Posko berhasil diperbarui! Cek halaman Tanggap Darurat untuk melihat perubahannya.");
+    } else {
+      alert("Gagal memperbarui data posko.");
     }
+    setIsUpdatingRelawan(false);
   };
-
-  // 2. Fungsi saat nilai di dalam form diketik
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: name === 'status_logistik' ? value : Number(value)
-    }));
-  };
-
-  // 3. Simpan perubahan ke database
-  const handleUpdatePosko = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedPosko) return;
-
-    setUpdatingRelawan(true);
-    setMessageRelawan('');
-
-    // Hitung total pengungsi otomatis
-    const totalRefugees = Number(formData.bayi) + Number(formData.anak) + Number(formData.dewasa) + Number(formData.lansia);
-
-    const { error } = await supabase
-      .from('evacuation_points')
-      .update({
-        bayi: formData.bayi,
-        anak: formData.anak,
-        dewasa: formData.dewasa,
-        lansia: formData.lansia,
-        current_refugees: totalRefugees, // Kolom ini otomatis diisi dari penjumlahan
-        beras_kg: formData.beras_kg,
-        air_liter: formData.air_liter,
-        masker_box: formData.masker_box,
-        status_logistik: formData.status_logistik
-      })
-      .eq('id', selectedPosko);
-
-    if (error) setMessageRelawan(`Gagal menyimpan data: ${error.message}`);
-    else {
-      setMessageRelawan('Sukses! Data posko dan logistik berhasil diperbarui secara real-time.');
-      fetchPoskos(); // Refresh data posko di latar belakang
-    }
-    setUpdatingRelawan(false);
-  };
-
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-semibold">Memuat Dasbor...</div>;
 
   return (
-    <main className="min-h-screen bg-gray-50 pb-12">
-      <nav className="bg-volcano-dark text-white px-6 py-4 flex justify-between items-center shadow-md sticky top-0 z-10">
-        <div className="font-bold text-xl flex items-center gap-2"><span>🌋</span> Dasbor Kendali SIB</div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-300 hidden md:block">Petugas: <strong className="text-white">{userEmail}</strong></span>
-          <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md text-sm font-bold transition">Keluar</button>
-        </div>
-      </nav>
-
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
+    <main className="min-h-screen bg-[#faf8f5] py-8 md:py-12">
+      <div className="max-w-5xl mx-auto px-4 md:px-8">
         
-        {/* =========================================================
-            MODUL 1: ADMIN (KENDALI STATUS GUNUNG)
-            ========================================================= */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
-          <div className="border-b pb-4 mb-6">
-            <h2 className="text-2xl font-bold text-volcano-dark">Kendali Status Gunung Ruang (Admin)</h2>
-            <p className="text-gray-500 text-sm mt-1">Ubah level aktivitas di bawah ini. Perubahan akan langsung tercermin di portal publik.</p>
+        {/* HEADER DASBOR */}
+        <div className="bg-[#4a1511] text-white p-8 rounded-[32px] shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 rounded-l-full translate-x-1/4 scale-150 pointer-events-none"></div>
+          <div className="relative z-10 text-center md:text-left">
+            <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Pusat Kendali Operasional</h1>
+            <p className="text-gray-300 text-sm">Kelola status peringatan dini dan pembaruan data logistik lapangan.</p>
           </div>
-
-          {messageAdmin && (
-            <div className={`mb-6 p-4 rounded-xl font-semibold text-sm ${messageAdmin.includes('Sukses') ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-              {messageAdmin}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-             <button onClick={() => handleUpdateStatus(1, 'Normal', 'Gunung Ruang berada pada Level I (Normal). Tidak ada aktivitas vulkanik yang membahayakan. Masyarakat dapat beraktivitas seperti biasa.')} disabled={updatingAdmin} className={`p-4 rounded-xl border-2 transition text-left ${currentLevel === 1 ? 'border-yellow-400 bg-yellow-50 shadow-md ring-2 ring-yellow-200' : 'border-gray-200 hover:border-yellow-400 opacity-70'}`}>
-              <div className="text-xl font-bold text-yellow-600 mb-1">Level I</div><div className="font-semibold text-gray-800">Normal</div>
+          <div className="relative z-10 flex gap-2 bg-white/10 p-2 rounded-2xl border border-white/20 backdrop-blur-sm">
+            <button 
+              onClick={() => setActiveTab('admin')}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'admin' ? 'bg-white text-[#4a1511] shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
+            >
+              Panel Admin (BPBD)
             </button>
-            <button onClick={() => handleUpdateStatus(2, 'Waspada', 'Gunung Ruang berada pada Level II (Waspada). Masyarakat diimbau tidak memasuki radius 4 km dari kawah.')} disabled={updatingAdmin} className={`p-4 rounded-xl border-2 transition text-left ${currentLevel === 2 ? 'border-orange-400 bg-orange-50 shadow-md ring-2 ring-orange-200' : 'border-gray-200 hover:border-orange-400 opacity-70'}`}>
-              <div className="text-xl font-bold text-orange-600 mb-1">Level II</div><div className="font-semibold text-gray-800">Waspada</div>
-            </button>
-            <button onClick={() => handleUpdateStatus(3, 'Siaga', 'Peringatan: Gunung Ruang berada pada Level III (Siaga). Terjadi peningkatan aktivitas vulkanik signifikan. Radius 4 KM wajib dikosongkan.')} disabled={updatingAdmin} className={`p-4 rounded-xl border-2 transition text-left ${currentLevel === 3 ? 'border-red-500 bg-red-50 shadow-md ring-2 ring-red-200' : 'border-gray-200 hover:border-red-500 opacity-70'}`}>
-              <div className="text-xl font-bold text-red-600 mb-1">Level III</div><div className="font-semibold text-gray-800">Siaga</div>
-            </button>
-            <button onClick={() => handleUpdateStatus(4, 'Awas', 'AWAS! Gunung Ruang berada pada Level IV (Awas). Erupsi besar dapat terjadi sewaktu-waktu. Evakuasi total seluruh penduduk radius 7 KM sekarang juga!')} disabled={updatingAdmin} className={`p-4 rounded-xl border-2 transition text-left ${currentLevel === 4 ? 'border-red-800 bg-red-100 shadow-md ring-2 ring-red-300' : 'border-gray-200 hover:border-red-800 opacity-70'}`}>
-              <div className="text-xl font-bold text-red-800 mb-1">Level IV</div><div className="font-semibold text-gray-900">Awas</div>
+            <button 
+              onClick={() => setActiveTab('relawan')}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'relawan' ? 'bg-white text-[#4a1511] shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
+            >
+              Panel Relawan Lapangan
             </button>
           </div>
         </div>
 
-
-        {/* =========================================================
-            MODUL 2: RELAWAN (MANAJEMEN LOGISTIK & PENGUNGSI)
-            ========================================================= */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
-          <div className="border-b pb-4 mb-6">
-            <h2 className="text-2xl font-bold text-volcano-main">Manajemen Logistik & Pengungsi (Relawan)</h2>
-            <p className="text-gray-500 text-sm mt-1">Pilih posko yang Anda tugasi, lalu mutakhirkan data jumlah pengungsi dan sisa logistik di gudang.</p>
-          </div>
-
-          {messageRelawan && (
-            <div className={`mb-6 p-4 rounded-xl font-semibold text-sm ${messageRelawan.includes('Sukses') ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
-              {messageRelawan}
-            </div>
-          )}
-
-          <div className="mb-8">
-            <label className="block text-sm font-bold text-gray-700 mb-2">Pilih Titik Posko Evakuasi</label>
-            <select 
-              value={selectedPosko} 
-              onChange={handlePoskoChange}
-              className="w-full md:w-1/2 p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-volcano-main outline-none bg-gray-50 font-semibold"
-            >
-              <option value="" disabled>-- Pilih Posko Anda --</option>
-              {poskos.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {selectedPosko && (
-            <form onSubmit={handleUpdatePosko} className="space-y-8 animate-fadeIn">
+        {/* =========================================
+            PANEL ADMIN (STATUS & RADIUS)
+            ========================================= */}
+        {activeTab === 'admin' && (
+          <div className="space-y-8 animate-fade-in-down">
+            
+            {/* KENDALI STATUS GUNUNG */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-2xl">🌋</span>
+                <h2 className="text-xl font-bold text-[#4a1511]">Kendali Tingkat Aktivitas Gunung Ruang</h2>
+              </div>
               
-              {/* Grup 1: Demografi Pengungsi */}
-              <div className="bg-blue-50/50 p-6 rounded-xl border border-blue-100">
-                <h3 className="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">👥 Demografi Pengungsi</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Bayi & Balita</label>
-                    <input type="number" min="0" name="bayi" value={formData.bayi} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Anak-anak</label>
-                    <input type="number" min="0" name="anak" value={formData.anak} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Dewasa</label>
-                    <input type="number" min="0" name="dewasa" value={formData.dewasa} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Lansia</label>
-                    <input type="number" min="0" name="lansia" value={formData.lansia} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-blue-400 outline-none" />
-                  </div>
-                </div>
-                <p className="text-xs text-blue-700 mt-3 font-medium">Total Pengungsi: {Number(formData.bayi) + Number(formData.anak) + Number(formData.dewasa) + Number(formData.lansia)} jiwa (Dihitung otomatis)</p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                {[
+                  { level: 1, name: 'Normal', color: 'bg-emerald-500 hover:bg-emerald-600', desc: 'Aktivitas vulkanik dasar.' },
+                  { level: 2, name: 'Waspada', color: 'bg-amber-500 hover:bg-amber-600', desc: 'Ada kenaikan aktivitas di atas level normal.' },
+                  { level: 3, name: 'Siaga', color: 'bg-orange-500 hover:bg-orange-600', desc: 'Peningkatan seismik signifikan, letusan dapat terjadi.' },
+                  { level: 4, name: 'Awas', color: 'bg-red-600 hover:bg-red-700', desc: 'Letusan utama sedang berlangsung, evakuasi total.' }
+                ].map((btn) => (
+                  <button
+                    key={btn.level}
+                    disabled={isUpdatingAdmin}
+                    onClick={() => handleUpdateStatus(btn.level, btn.name, btn.desc)}
+                    className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 text-white transition-all transform active:scale-95 ${btn.color} ${status.level === btn.level ? 'ring-4 ring-offset-2 ring-[#4a1511] shadow-lg scale-105' : 'opacity-80'}`}
+                  >
+                    <span className="text-xl font-black">Level {btn.level}</span>
+                    <span className="text-xs font-bold uppercase tracking-widest">{btn.name}</span>
+                  </button>
+                ))}
               </div>
-
-              {/* Grup 2: Inventaris Logistik */}
-              <div className="bg-orange-50/50 p-6 rounded-xl border border-orange-100">
-                <h3 className="text-lg font-bold text-orange-900 mb-4 flex items-center gap-2">📦 Stok Logistik Fisik</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Beras / Makanan Pokok (Kg)</label>
-                    <input type="number" min="0" name="beras_kg" value={formData.beras_kg} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-orange-400 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Air Bersih (Liter)</label>
-                    <input type="number" min="0" name="air_liter" value={formData.air_liter} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-orange-400 outline-none" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Masker N95 (Box)</label>
-                    <input type="number" min="0" name="masker_box" value={formData.masker_box} onChange={handleInputChange} className="w-full p-2.5 rounded border border-gray-300 focus:ring-2 focus:ring-orange-400 outline-none" />
-                  </div>
-                </div>
+              <div className="text-center p-3 bg-gray-50 rounded-xl border border-gray-200">
+                <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Status Aktif di Website:</span>
+                <p className="text-lg font-black text-[#4a1511]">Level {status.level} — {status.name}</p>
               </div>
+            </div>
 
-              {/* Grup 3: Status Penilaian Relawan */}
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div className="w-full md:w-1/2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Penilaian Status Logistik Keseluruhan</label>
-                  <select name="status_logistik" value={formData.status_logistik} onChange={handleInputChange} className="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-volcano-main outline-none font-semibold">
-                    <option value="Aman">Aman (Stok Mencukupi)</option>
-                    <option value="Menipis">Menipis (Perlu Pasokan Segera)</option>
-                    <option value="Kritis">Kritis (Kekurangan / Kelaparan)</option>
-                  </select>
-                </div>
-                
-                <div className="w-full md:w-auto mt-4 md:mt-0">
-                  <button type="submit" disabled={updatingRelawan} className={`w-full md:w-auto px-8 py-3 rounded-lg font-bold text-white shadow-md transition ${updatingRelawan ? 'bg-gray-400' : 'bg-volcano-main hover:bg-volcano-dark'}`}>
-                    {updatingRelawan ? 'Menyimpan...' : 'Simpan Pembaruan Data'}
+            {/* KENDALI RADIUS BAHAYA */}
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-2xl">🎯</span>
+                <h2 className="text-xl font-bold text-[#4a1511]">Kendali Radius Bahaya (Area Wajib Kosong)</h2>
+              </div>
+              <div className="max-w-xl">
+                <label className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2 block">
+                  Jarak Radius Bahaya (Dalam Meter)
+                </label>
+                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                  <input 
+                    type="number" 
+                    value={radiusBahaya} 
+                    onChange={(e) => setRadiusBahaya(Number(e.target.value))}
+                    className="w-full sm:flex-1 bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 font-bold text-lg focus:ring-2 focus:ring-red-500 outline-none"
+                  />
+                  <button 
+                    onClick={handleUpdateRadius}
+                    disabled={isUpdatingAdmin}
+                    className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition whitespace-nowrap"
+                  >
+                    {isUpdatingAdmin ? "Menyimpan..." : "Terapkan Radius"}
                   </button>
                 </div>
+                <p className="text-xs text-gray-500 mt-3 border-l-2 border-red-500 pl-2">
+                  Mengubah radius ini akan langsung memperbesar atau memperkecil lingkaran merah rawan bencana di halaman Peta Tanggap Darurat publik.
+                </p>
               </div>
+            </div>
 
-            </form>
-          )}
+          </div>
+        )}
 
-        </div>
+        {/* =========================================
+            PANEL RELAWAN (UPDATE POSKO & LOGISTIK)
+            ========================================= */}
+        {activeTab === 'relawan' && (
+          <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 animate-fade-in-down">
+            <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+              <span className="text-2xl">📦</span>
+              <h2 className="text-xl font-bold text-[#4a1511]">Formulir Pelaporan Relawan</h2>
+            </div>
+
+            {/* Pilih Posko */}
+            <div className="mb-8">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">1. Pilih Lokasi Bertugas</label>
+              <select 
+                value={selectedPoskoId}
+                onChange={(e) => setSelectedPoskoId(e.target.value)}
+                className="w-full bg-[#faf8f5] border border-gray-200 rounded-xl p-3 text-[#4a1511] font-bold focus:ring-2 focus:ring-[#4a1511] outline-none cursor-pointer"
+              >
+                <option value="" disabled>-- Pilih Posko Anda --</option>
+                {poskos.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Form Input Muncul Jika Posko Terpilih */}
+            {selectedPoskoId ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Data Pengungsi */}
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                    <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-3 block">👥 Jumlah Pengungsi Saat Ini</label>
+                    <input 
+                      type="number" 
+                      value={poskoData.current_refugees}
+                      onChange={(e) => setPoskoData({...poskoData, current_refugees: Number(e.target.value)})}
+                      className="w-full bg-white border border-gray-200 rounded-xl p-3 font-bold text-gray-800"
+                    />
+                  </div>
+
+                  {/* Status Logistik Keseluruhan */}
+                  <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                    <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-3 block">🏷️ Status Logistik Umum</label>
+                    <select 
+                      value={poskoData.status_logistik}
+                      onChange={(e) => setPoskoData({...poskoData, status_logistik: e.target.value})}
+                      className="w-full bg-white border border-gray-200 rounded-xl p-3 font-bold text-gray-800"
+                    >
+                      <option value="Aman">Aman (Hijau)</option>
+                      <option value="Menipis">Menipis (Oranye)</option>
+                      <option value="Kritis">Kritis (Merah)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Detail Inventaris Logistik */}
+                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
+                  <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-4 block">📦 Pembaruan Stok Logistik</label>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="text-[11px] text-gray-500 font-bold mb-1 block">Beras / Makanan (Kg)</label>
+                      <input type="number" value={poskoData.beras_kg} onChange={(e) => setPoskoData({...poskoData, beras_kg: Number(e.target.value)})} className="w-full bg-white border border-gray-200 rounded-xl p-3 font-bold text-gray-800" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-gray-500 font-bold mb-1 block">Air Bersih (Liter)</label>
+                      <input type="number" value={poskoData.air_liter} onChange={(e) => setPoskoData({...poskoData, air_liter: Number(e.target.value)})} className="w-full bg-white border border-gray-200 rounded-xl p-3 font-bold text-gray-800" />
+                    </div>
+                    <div>
+                      <label className="text-[11px] text-gray-500 font-bold mb-1 block">Masker (Box)</label>
+                      <input type="number" value={poskoData.masker_box} onChange={(e) => setPoskoData({...poskoData, masker_box: Number(e.target.value)})} className="w-full bg-white border border-gray-200 rounded-xl p-3 font-bold text-gray-800" />
+                    </div>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleUpdatePosko}
+                  disabled={isUpdatingRelawan}
+                  className="w-full bg-[#4a1511] hover:bg-[#6b201a] text-white font-bold py-4 rounded-xl transition shadow-md mt-4"
+                >
+                  {isUpdatingRelawan ? "Mengirim Laporan..." : "Simpan & Publikasikan Laporan Posko"}
+                </button>
+              </div>
+            ) : (
+              <div className="text-center p-8 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
+                <span className="text-4xl block mb-2">📍</span>
+                <p className="text-gray-500 font-medium">Pilih posko di atas untuk mulai memperbarui data logistik dan pengungsi.</p>
+              </div>
+            )}
+
+          </div>
+        )}
+
       </div>
     </main>
   );
