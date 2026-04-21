@@ -104,7 +104,7 @@ export default function PascaBencana() {
                   <Tooltip 
                     cursor={{ fill: '#f3f4f6' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    formatter={(value: number) => [`Level ${value}`, 'Skala VEI']}
+                    formatter={(value: any) => [`Level ${value}`, 'Skala VEI']}
                     labelStyle={{ fontWeight: 'bold', color: '#4a1511', marginBottom: '4px' }}
                   />
                   <Bar dataKey="vei" radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
