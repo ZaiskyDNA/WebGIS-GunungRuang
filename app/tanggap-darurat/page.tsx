@@ -19,6 +19,14 @@ export default function TanggapDarurat() {
   const [poskos, setPoskos] = useState<any[]>([]);
   const [totalRefugees, setTotalRefugees] = useState(0);
   const [totalCapacity, setTotalCapacity] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentStatus, setCurrentStatus] = useState({
+    level: 2,
+    name: 'Waspada',
+    roman: 'II',
+    description: 'Aktivitas vulkanik menunjukkan peningkatan. Masyarakat diimbau untuk tidak mendekati kawah.',
+    lastUpdated: 'Memuat data...'
+  });
 
   useEffect(() => {
     async function fetchData() {
@@ -35,9 +43,75 @@ export default function TanggapDarurat() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    async function fetchStatus() {
+      try {
+        const { data, error } = await supabase
+          .from('volcano_status')
+          .select('*')
+          .eq('id', 1)
+          .single();
+
+        if (data && !error) {
+          const romanNumerals = ['I', 'II', 'III', 'IV'];
+          const roman = romanNumerals[data.level - 1] || 'I';
+          
+          const dateObj = new Date(data.updated_at);
+          const formattedDate = dateObj.toLocaleDateString('id-ID', { 
+            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit' 
+          });
+
+          setCurrentStatus({
+            level: data.level,
+            name: data.name,
+            roman: roman,
+            description: data.description,
+            lastUpdated: `${formattedDate} WITA`
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil status gunung:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchStatus();
+  }, []);
+
+  const getLevelTheme = (level: number) => {
+    switch(level) {
+      case 1: return { color: '#10b981', bg: 'bg-emerald-500', text: 'text-emerald-700', lightBg: 'bg-emerald-50', border: 'border-emerald-500' };
+      case 2: return { color: '#f59e0b', bg: 'bg-amber-500', text: 'text-amber-700', lightBg: 'bg-amber-50', border: 'border-amber-500' };
+      case 3: return { color: '#f97316', bg: 'bg-orange-500', text: 'text-orange-700', lightBg: 'bg-orange-50', border: 'border-orange-500' };
+      case 4: return { color: '#dc2626', bg: 'bg-red-600', text: 'text-red-700', lightBg: 'bg-red-50', border: 'border-red-600' };
+      default: return { color: '#f59e0b', bg: 'bg-amber-500', text: 'text-amber-700', lightBg: 'bg-amber-50', border: 'border-amber-500' };
+    }
+  };
+
+  const theme = getLevelTheme(currentStatus.level);
+
   return (
     <main className="min-h-screen bg-[#faf8f5] py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
+        
+        {/* ── ALERT BANNER DINAMIS ── */}
+        {!isLoading && (
+          <div className={`${theme.bg} text-white rounded-2xl px-5 py-4 flex flex-col md:flex-row md:items-center gap-4 shadow-md`}>
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-4 w-4">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-white`}></span>
+                <span className={`relative inline-flex rounded-full h-4 w-4 bg-white/90`}></span>
+              </span>
+              <span className="font-bold tracking-widest uppercase text-sm whitespace-nowrap">Status {currentStatus.name}</span>
+            </div>
+            <p className="text-sm md:text-base leading-relaxed flex-1 border-l-0 md:border-l border-white/20 pl-0 md:pl-4">
+              {currentStatus.description}
+            </p>
+            <div className="text-xs font-semibold bg-black/20 px-3 py-2 rounded-xl backdrop-blur-sm self-start md:self-center">
+              Diperbarui: {currentStatus.lastUpdated}
+            </div>
+          </div>
+        )}
         
         {/* ── HEADER MARUN ELEGAN ── */}
         <div className="bg-[#4a1511] text-white p-8 md:p-10 rounded-[32px] shadow-xl relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-8">

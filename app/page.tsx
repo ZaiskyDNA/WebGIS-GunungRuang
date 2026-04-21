@@ -38,6 +38,16 @@ const hazards = [
     title: 'Tsunami Vulkanik',
     desc: 'Erupsi masif atau longsor bawah laut dapat memicu gelombang. Tanda: air laut surut tiba-tiba → segera lari ke dataran tinggi.',
   },
+  {
+    icon: '🪨',
+    title: 'Lontaran Batu dan Pasir',
+    desc: 'Material padat yang terlempar dari kawah saat letusan eksplosif.',
+  },
+  {
+    icon: '🏚️',
+    title: 'Gempa Bumi Vulkanik',
+    desc: 'Getaran tanah yang disebabkan oleh pergerakan magma sebelum atau saat letusan, yang dapat meruntuhkan bangunan',
+  },
 ];
 
 const actionProtocols = [
@@ -85,6 +95,21 @@ const officialSources = [
   { name: 'inaRISK (BNPB)', desc: 'Peta risiko bencana nasional', link: 'inarisk.bnpb.go.id' },
   { name: 'BMKG', desc: 'Peringatan dini cuaca & tsunami', link: 'bmkg.go.id' },
   { name: 'Radio Darurat Sitaro', desc: 'Siaran koordinasi evakuasi lokal', link: 'FM 103.5 MHz' },
+];
+
+const disasterReductionGuide = [
+  { num: 1, text: 'Tutup rapat jendela, Pintu, dan lubang angin rumah.' },
+  { num: 2, text: 'Lindungi kendaraan bermotor atau peralatan mesin lainnya dan matikan mesinnya.' },
+  { num: 4, text: 'Kumpulkan keluarga, ambil tas yang sudah di siapkan, dan segera mengungsi.' },
+  { num: 5, text: 'Kenakan pakaian yang melindungi tubuh, seperti baju panjang, topi, dan lainnya.' },
+  { num: 6, text: 'Gunakan kacamata atau apapun untuk mencegah debu masuk mata.' },
+  { num: 7, text: 'Jangan memakai lensa kotak.' },
+  { num: 8, text: 'Pakai masker atau kain untuk menutup mulut dan hidung.' },
+  { num: 9, text: 'Menutup wajah dengan kedua belah tangan saat abu letusan gunung turun.' },
+  { num: 10, text: 'Dengarkan instruksi pihak berwenang dan ikuti rute mengungsi yang di tetapkan.' },
+  { num: 11, text: 'Hindari lokasi rawan letusan (Lereng Gunung, Lembah, Sungai Kering, Aliran lahar).' },
+  { num: 12, text: 'Usahakan masuk ke ruang lindung darurat/ Bungker.' },
+  { num: 13, text: 'Siapkan diri menghadapi bencana susulan.' },
 ];
 
 /* ─── KOMPONEN UI ─────────────────────────────────────────────── */
@@ -246,7 +271,9 @@ export default function Home() {
           {[
             { num: '725 mdpl', lbl: 'Ketinggian', sub: 'Tipe Stratovolcano' },
             { num: '±12.000', lbl: 'Jiwa Rentan', sub: 'Dalam Radius 7 KM' },
-            { num: 'Tsunami', lbl: 'Potensi Ikutan', sub: 'Akibat longsoran laut' },
+            { num: 'Tsunami', lbl: 'Potensi Ikutan', sub: 'Akibat material vulkanik yang masuk ke laut' },
+            { num: 'VEI 4', lbl: 'Kekuatan Erupsi', sub: 'Skala Volcanic Explosivity Index' },
+            { num: '2024', lbl: 'Terakhir Letusan', sub: 'Erupsi Besar Terakhir' },
           ].map(({ num, lbl, sub }, i) => (
             <div key={i} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
               <div className="text-xl md:text-2xl font-black text-[#4a1511] mb-1">{num}</div>
@@ -386,7 +413,27 @@ export default function Home() {
           </Card>
         </div>
 
-        {/* ── 6. FOOTER INFORMASI RESMI ── */}
+        {/* ── 6. PANDUAN MENGURANGI RISIKO BENCANA ── */}
+        <Card>
+          <CardTitle icon="📚">Informasi Panduan Mengurangi Risiko Bencana Gunung Meletus</CardTitle>
+          <p className="text-xs text-gray-500 mb-5 border-l-2 border-[#4a1511] pl-3 font-medium">
+            Ikuti langkah-langkah penting ini untuk melindungi diri dan keluarga dari bahaya letusan gunung meletus.
+          </p>
+          <div className="space-y-2.5">
+            {disasterReductionGuide.map((guide) => (
+              <div key={guide.num} className="flex items-start gap-3 p-3 md:p-4 bg-gradient-to-r from-orange-50/50 to-red-50/30 rounded-xl border border-orange-100/50 hover:border-orange-200 transition-colors">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#4a1511] text-white flex items-center justify-center text-xs font-bold">
+                  {guide.num}
+                </div>
+                <p className="text-xs md:text-sm text-gray-800 leading-relaxed pt-0.5">
+                  {guide.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* ── 7. FOOTER INFORMASI RESMI ── */}
         <div className="bg-[#2a0e0c] text-gray-400 p-6 md:p-8 rounded-3xl flex flex-col lg:flex-row justify-between items-center gap-5 text-center lg:text-left">
           <div>
             <h5 className="text-white font-bold mb-1.5 md:text-lg">Portal Siaga Bencana Daerah — Gunung Ruang</h5>

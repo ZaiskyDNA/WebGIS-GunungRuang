@@ -29,7 +29,6 @@ const GATHERING_POINTS = [
   { name: "Kantor Camat Tagulandang Utara", lat: 2.352551, lng: 125.429462, elev: "173.2m", type: "temp" },
   { name: "SDN Inpres Mohongsawang", lat: 2.380080, lng: 125.385743, elev: "10.6m", type: "temp" },
   { name: "SMK Negeri 1 Tagulandang Utara", lat: 2.346008, lng: 125.422166, elev: "166.4m", type: "temp" },
-  { name: "SPPG Tagulandang Induk", lat: 2.328525, lng: 125.393735, elev: "26.8m", type: "temp" },
   { name: "SPPG Tagulandang Selatan", lat: 2.318665, lng: 125.437831, elev: "7.5m", type: "temp" },
   { name: "SPPG Tagulandang Utara", lat: 2.368347, lng: 125.418561, elev: "6.1m", type: "temp" }
 ];
