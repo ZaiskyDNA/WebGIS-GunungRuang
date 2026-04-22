@@ -61,19 +61,30 @@ export default function DetailPosko() {
 
         {/* Header Posko */}
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 md:p-10 mb-8">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 pb-8">
             <div>
               <div className="inline-block bg-[#4a1511]/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-[#4a1511] mb-3">Detail Posko</div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-[#4a1511] mb-2">{posko.name}</h1>
-              <p className="text-gray-500 flex items-center gap-2 text-sm font-medium"><span>📍</span> {posko.address}</p>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-[#4a1511] mb-3">{posko.name}</h1>
+              <p className="text-gray-500 flex items-center gap-2 text-sm font-medium mb-5"><span>📍</span> {posko.address}</p>
+              
+              {/* TOMBOL RUTE GOOGLE MAPS (BARU) */}
+              <a 
+                href={`https://www.google.com/maps/dir/?api=1&destination=${posko.lat},${posko.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#4a1511] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#6b201a] transition-all shadow-md hover:shadow-lg active:scale-95"
+              >
+                <span className="text-lg">🗺️</span> Petunjuk Rute (Google Maps)
+              </a>
             </div>
-            <div className={`px-5 py-3 rounded-2xl font-bold border-2 shadow-sm ${
+            
+            <div className={`px-5 py-3 rounded-2xl font-bold border-2 shadow-sm w-full md:w-auto text-center md:text-left ${
               posko.status_logistik === 'Kritis' ? 'bg-red-50 text-red-700 border-red-200' : 
               posko.status_logistik === 'Menipis' ? 'bg-orange-50 text-orange-700 border-orange-200' : 
               'bg-emerald-50 text-emerald-700 border-emerald-200'
             }`}>
               <div className="text-[10px] uppercase tracking-widest opacity-70 mb-0.5">Status Logistik</div>
-              {posko.status_logistik.toUpperCase()}
+              <div className="text-lg md:text-base">{posko.status_logistik.toUpperCase()}</div>
             </div>
           </div>
 

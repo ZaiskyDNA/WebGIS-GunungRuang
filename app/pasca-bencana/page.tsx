@@ -81,7 +81,7 @@ export default function PascaBencana() {
         </div>
 
         {/* =========================================
-            SECTION 1: GRAFIK HISTORIS & EDUKASI VEI
+            SECTION 1: GRAFIK HISTORIS & GAMBAR VEI
             ========================================= */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
@@ -94,7 +94,6 @@ export default function PascaBencana() {
               <p className="text-sm text-gray-500">Grafik riwayat letusan terkonfirmasi Gunung Ruang berdasarkan skala VEI.</p>
             </div>
             
-            {/* PERBAIKAN: Gunakan minHeight dan berikan height={400} langsung ke ResponsiveContainer */}
             <div style={{ width: '100%', minHeight: '400px' }}>
               <ResponsiveContainer width="100%" height={400}>
                 <BarChart data={veiHistoryData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
@@ -104,7 +103,7 @@ export default function PascaBencana() {
                   <Tooltip 
                     cursor={{ fill: '#f3f4f6' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    formatter={(value: any) => [`Level ${value}`, 'Skala VEI']}
+                    formatter={(value: any) => [`${value}`, 'VEI']}
                     labelStyle={{ fontWeight: 'bold', color: '#4a1511', marginBottom: '4px' }}
                   />
                   <Bar dataKey="vei" radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
@@ -119,47 +118,29 @@ export default function PascaBencana() {
             <div className="mt-4 flex justify-center gap-4 text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest">
               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#eab308] rounded-sm"></div> VEI 1-2</div>
               <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#D53E0F] rounded-sm"></div> VEI 3</div>
-              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#9B0F06] rounded-sm"></div> VEI 4 (Cataclysmic)</div>
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#9B0F06] rounded-sm"></div> VEI 4</div>
             </div>
           </div>
 
-          {/* Kartu Edukasi VEI */}
-          <div className="lg:col-span-5 bg-[#4a1511] text-white p-6 md:p-8 rounded-[32px] shadow-lg relative overflow-hidden flex flex-col justify-center">
-            <div className="absolute -bottom-10 -right-10 text-[150px] opacity-5">🌋</div>
-            <div className="relative z-10">
-              <h2 className="text-xl md:text-2xl font-bold mb-4 tracking-tight border-b border-white/20 pb-4">
+          {/* Kartu Gambar Edukasi VEI (Baru) */}
+          <div className="lg:col-span-5 bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden">
+            <div className="w-full mb-4">
+              <h2 className="text-xl md:text-2xl font-bold text-[#4a1511] tracking-tight">
                 Mengenal Skala VEI
               </h2>
-              <p className="text-gray-200 text-sm leading-relaxed mb-6 font-light">
-                <strong className="text-white">Volcanic Explosivity Index (VEI)</strong> adalah skala logaritmik (0 hingga 8) yang mengukur besaran letusan gunung berapi berdasarkan volume material (tefra) yang dimuntahkan dan tinggi kolom abunya. Setiap interval naik 1 angka, kekuatan letusan meningkat 10 kali lipat.
-              </p>
-              
-              <div className="space-y-3">
-                <div className="bg-white/10 p-3 rounded-xl border border-white/10">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-yellow-400">VEI 0 - 2 (Hawaiian / Strombolian)</span>
-                  </div>
-                  <p className="text-xs text-gray-300">Erupsi kecil hingga sedang (Explosive).</p>
-                </div>
-                <div className="bg-white/10 p-3 rounded-xl border border-white/10">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-orange-400">VEI 3 (Vulcanian)</span>
-                  </div>
-                  <p className="text-xs text-gray-300">Erupsi berdaya rusak parah (Catastrophic).</p>
-                </div>
-                <div className="bg-white/10 p-3 rounded-xl border border-red-400/50 shadow-[0_0_15px_rgba(248,113,113,0.2)]">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-red-400">VEI 4 (Sub-Plinian) ← G. Ruang 2024</span>
-                  </div>
-                  <p className="text-xs text-gray-300">Erupsi Cataclysmic. Tinggi kolom abu bisa mencapai 25 km ke stratosfer.</p>
-                </div>
-                <div className="bg-white/10 p-3 rounded-xl border border-white/10 opacity-70">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-bold text-purple-300">VEI 5 - 8 (Plinian / Ultra-Plinian)</span>
-                  </div>
-                  <p className="text-xs text-gray-300">Erupsi raksasa (Contoh: Gn. Tambora, Yellowstone).</p>
-                </div>
-              </div>
+              <p className="text-gray-500 text-sm mt-1">Perbandingan volume material erupsi gunung berapi.</p>
+            </div>
+            
+            {/* Wadah Gambar veiscala.jpg */}
+            <div className="w-full flex-1 relative flex items-center justify-center bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden p-4">
+              <img 
+                src="/veiscala.jpg" 
+                alt="Infografis Skala Volcanic Explosivity Index (VEI)" 
+                className="w-full h-full object-contain mix-blend-multiply"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x800?text=Gambar+veiscala.jpg+Belum+Ada';
+                }}
+              />
             </div>
           </div>
         </div>
