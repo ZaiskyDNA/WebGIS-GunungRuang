@@ -17,7 +17,7 @@ export default function Navbar() {
           {/* Logo & Judul */}
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="font-bold text-lg md:text-xl tracking-wider flex items-center gap-2">
-              <span className="text-2xl">🌋</span> SIB G.RUANG
+              <span className="text-2xl">🌋</span>  RUANGTANGGUH
             </Link>
           </div>
 

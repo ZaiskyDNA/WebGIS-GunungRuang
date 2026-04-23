@@ -69,7 +69,7 @@ export default function PascaBencana() {
             {[
               { value: '± 12.000', label: 'JIWA DIEVAKUASI' },
               { value: '3.000+', label: 'RUMAH RUSAK' },
-              { value: '2 Desa', label: 'DIHAPUS PERMANEN' },
+              { value: '2 Desa', label: 'DIRELOKASI KE TEMPAT LAIN' },
               { value: 'Rp 300 M+', label: 'ESTIMASI KERUGIAN' },
             ].map((stat, i) => (
               <div key={i} className="bg-white py-6 md:py-8 px-4 rounded-2xl shadow-sm border border-gray-100 text-center transition-transform hover:-translate-y-1">
