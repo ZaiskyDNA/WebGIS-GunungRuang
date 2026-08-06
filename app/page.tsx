@@ -3,12 +3,13 @@
 import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { DEFAULT_VOLCANO_STATUS, formatVolcanoStatus, getLevelTheme } from '../lib/volcano';
 
 // Memuat peta secara dinamis untuk menghindari error SSR
 const MapComponent = dynamic(() => import('../components/MapPraBencana'), {
   ssr: false,
   loading: () => (
-    <div className="h-[400px] md:h-[600px] w-full bg-[#faf8f5] rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-[#4a1511]/20 text-[#4a1511]/60 font-bold tracking-widest text-sm">
+    <div className="h-[400px] md:h-[600px] w-full bg-canvas rounded-3xl flex flex-col items-center justify-center border-2 border-dashed border-volcano-dark/20 text-volcano-dark/60 font-bold tracking-widest text-sm">
       <span className="text-4xl mb-3 animate-bounce">🗺️</span>
       MEMUAT PETA ZONASI BENCANA...
     </div>
@@ -100,23 +101,23 @@ const officialSources = [
 const disasterReductionGuide = [
   { num: 1, text: 'Tutup rapat jendela, Pintu, dan lubang angin rumah.' },
   { num: 2, text: 'Lindungi kendaraan bermotor atau peralatan mesin lainnya dan matikan mesinnya.' },
-  { num: 4, text: 'Kumpulkan keluarga, ambil tas yang sudah di siapkan, dan segera mengungsi.' },
-  { num: 5, text: 'Kenakan pakaian yang melindungi tubuh, seperti baju panjang, topi, dan lainnya.' },
-  { num: 6, text: 'Gunakan kacamata atau apapun untuk mencegah debu masuk mata.' },
-  { num: 7, text: 'Jangan memakai lensa kotak.' },
-  { num: 8, text: 'Pakai masker atau kain untuk menutup mulut dan hidung.' },
-  { num: 9, text: 'Menutup wajah dengan kedua belah tangan saat abu letusan gunung turun.' },
-  { num: 10, text: 'Dengarkan instruksi pihak berwenang dan ikuti rute mengungsi yang di tetapkan.' },
-  { num: 11, text: 'Hindari lokasi rawan letusan (Lereng Gunung, Lembah, Sungai Kering, Aliran lahar).' },
-  { num: 12, text: 'Usahakan masuk ke ruang lindung darurat/ Bungker.' },
-  { num: 13, text: 'Siapkan diri menghadapi bencana susulan.' },
+  { num: 3, text: 'Kumpulkan keluarga, ambil tas yang sudah di siapkan, dan segera mengungsi.' },
+  { num: 4, text: 'Kenakan pakaian yang melindungi tubuh, seperti baju panjang, topi, dan lainnya.' },
+  { num: 5, text: 'Gunakan kacamata atau apapun untuk mencegah debu masuk mata.' },
+  { num: 6, text: 'Jangan memakai lensa kotak.' },
+  { num: 7, text: 'Pakai masker atau kain untuk menutup mulut dan hidung.' },
+  { num: 8, text: 'Menutup wajah dengan kedua belah tangan saat abu letusan gunung turun.' },
+  { num: 9, text: 'Dengarkan instruksi pihak berwenang dan ikuti rute mengungsi yang di tetapkan.' },
+  { num: 10, text: 'Hindari lokasi rawan letusan (Lereng Gunung, Lembah, Sungai Kering, Aliran lahar).' },
+  { num: 11, text: 'Usahakan masuk ke ruang lindung darurat/ Bungker.' },
+  { num: 12, text: 'Siapkan diri menghadapi bencana susulan.' },
 ];
 
 /* ─── KOMPONEN UI ─────────────────────────────────────────────── */
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-8 ${className}`}>
+    <div className={`yota-panel p-5 md:p-8 ${className}`}>
       {children}
     </div>
   );
@@ -124,7 +125,7 @@ function Card({ children, className = '' }: { children: React.ReactNode; classNa
 
 function CardTitle({ icon, children }: { icon: string; children: React.ReactNode }) {
   return (
-    <h2 className="text-lg md:text-2xl font-bold text-[#4a1511] mb-5 flex items-center gap-3">
+    <h2 className="text-lg md:text-2xl font-bold text-volcano-dark mb-5 flex items-center gap-3">
       <span className="text-2xl md:text-3xl">{icon}</span>
       {children}
     </h2>
@@ -147,13 +148,7 @@ export default function Home() {
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   
-  const [currentStatus, setCurrentStatus] = useState({
-    level: 2,
-    name: 'Waspada',
-    roman: 'II',
-    description: 'Aktivitas vulkanik menunjukkan peningkatan. Masyarakat diimbau untuk tidak mendekati kawah.',
-    lastUpdated: 'Memuat data...'
-  });
+  const [currentStatus, setCurrentStatus] = useState(DEFAULT_VOLCANO_STATUS);
 
   useEffect(() => {
     async function fetchStatus() {
@@ -165,21 +160,7 @@ export default function Home() {
           .single();
 
         if (data && !error) {
-          const romanNumerals = ['I', 'II', 'III', 'IV'];
-          const roman = romanNumerals[data.level - 1] || 'I';
-          
-          const dateObj = new Date(data.updated_at);
-          const formattedDate = dateObj.toLocaleDateString('id-ID', { 
-            day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit' 
-          });
-
-          setCurrentStatus({
-            level: data.level,
-            name: data.name,
-            roman: roman,
-            description: data.description,
-            lastUpdated: `${formattedDate} WITA`
-          });
+          setCurrentStatus(formatVolcanoStatus(data));
         }
       } catch (err) {
         console.error("Gagal mengambil status gunung:", err);
@@ -193,26 +174,17 @@ export default function Home() {
   const toggleCheck = (key: string) => {
     setCheckedItems(prev => {
       const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
       return next;
     });
-  };
-
-  const getLevelTheme = (level: number) => {
-    switch(level) {
-      case 1: return { color: '#10b981', bg: 'bg-emerald-500', text: 'text-emerald-700', lightBg: 'bg-emerald-50', border: 'border-emerald-500' };
-      case 2: return { color: '#f59e0b', bg: 'bg-amber-500', text: 'text-amber-700', lightBg: 'bg-amber-50', border: 'border-amber-500' };
-      case 3: return { color: '#f97316', bg: 'bg-orange-500', text: 'text-orange-700', lightBg: 'bg-orange-50', border: 'border-orange-500' };
-      case 4: return { color: '#dc2626', bg: 'bg-red-600', text: 'text-red-700', lightBg: 'bg-red-50', border: 'border-red-600' };
-      default: return { color: '#f59e0b', bg: 'bg-amber-500', text: 'text-amber-700', lightBg: 'bg-amber-50', border: 'border-amber-500' };
-    }
   };
 
   const theme = getLevelTheme(currentStatus.level);
 
   return (
-    <main className="min-h-screen bg-[#faf8f5] py-6 md:py-10">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8 md:space-y-10">
+    <main className="min-h-screen py-6 md:py-10">
+      <div className="yota-shell space-y-8 md:space-y-10">
 
         {/* ── 1. ALERT BANNER DINAMIS ── */}
         {!isLoading && (
@@ -234,16 +206,16 @@ export default function Home() {
         )}
 
         {/* ── 2. HEADER UTAMA RESMI ── */}
-        <div className="bg-[#4a1511] text-white p-6 md:p-10 rounded-[32px] shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="yota-hero p-6 md:p-10 rounded-[32px] flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 rounded-l-full translate-x-1/3 scale-150 pointer-events-none"></div>
           
           <div className="relative z-10 max-w-2xl text-center md:text-left">
             <div className="inline-block bg-white/10 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-widest text-red-200 border border-red-300/20 mb-4">
-              Portal Siaga Bencana Daerah
+              YOTA · Portal Siaga Bencana
             </div>
             <h1 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight leading-tight">
-              Sistem Informasi Bencana <br className="hidden md:block"/>
-              Gunung Ruang
+              Kenali Risiko. <br className="hidden md:block"/>
+              Bergerak Lebih Siap.
             </h1>
             <p className="text-gray-200 text-sm md:text-lg leading-relaxed font-light">
               Pusat informasi mitigasi, pemantauan status terkini, pemetaan kawasan rawan, dan panduan kesiapsiagaan masyarakat di Kepulauan Sitaro, Sulawesi Utara.
@@ -276,7 +248,7 @@ export default function Home() {
             { num: '2024', lbl: 'Terakhir Letusan', sub: 'Erupsi Besar Terakhir' },
           ].map(({ num, lbl, sub }, i) => (
             <div key={i} className="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col justify-center">
-              <div className="text-xl md:text-2xl font-black text-[#4a1511] mb-1">{num}</div>
+              <div className="text-xl md:text-2xl font-black text-volcano-dark mb-1">{num}</div>
               <div className="text-[10px] md:text-[11px] font-bold text-gray-800 uppercase tracking-wider">{lbl}</div>
               <div className="text-[10px] text-gray-400 mt-1 hidden md:block">{sub}</div>
             </div>
@@ -292,7 +264,7 @@ export default function Home() {
             {/* Header Peta (Aman dari bug overlap absolute) */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-2">
               <div>
-                <h3 className="text-lg md:text-xl font-bold text-[#4a1511] flex items-center gap-2">
+                <h3 className="text-lg md:text-xl font-bold text-volcano-dark flex items-center gap-2">
                   <span>🗺️</span> Peta Dampak Erupsi 2024
                 </h3>
                 <p className="text-xs font-medium text-gray-500">Pemetaan Titik Evakuasi & Area Rentan Bencana</p>
@@ -332,7 +304,7 @@ export default function Home() {
           {/* Kolom Instruksi (Lebar 4/12) */}
           <div className="lg:col-span-4 flex flex-col h-full">
             <Card className="!p-5 md:!p-6 flex-1">
-              <h3 className="text-sm font-bold text-[#4a1511] uppercase tracking-widest border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
+              <h3 className="text-sm font-bold text-volcano-dark uppercase tracking-widest border-b border-gray-100 pb-3 mb-4 flex items-center gap-2">
                 <span>📋</span> Instruksi Keselamatan
               </h3>
               <div className="space-y-3">
@@ -358,14 +330,14 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
           <Card>
             <CardTitle icon="⚠️">Mengenal Potensi Bahaya</CardTitle>
-            <p className="text-xs text-gray-500 mb-5 border-l-2 border-[#4a1511] pl-3 font-medium">
+            <p className="text-xs text-gray-500 mb-5 border-l-2 border-volcano-orange pl-3 font-medium">
               Pahami karakteristik letusan Gunung Ruang agar Anda dan keluarga dapat mengambil keputusan evakuasi yang tepat.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
               {hazards.map(({ icon, title, desc }) => (
-                <div key={title} className="bg-gray-50/50 rounded-2xl p-4 md:p-5 border border-gray-100 transition-colors hover:bg-white hover:border-[#4a1511]/20">
+                <div key={title} className="bg-volcano-sand/15 rounded-2xl p-4 md:p-5 border border-volcano-dark/10 transition-colors hover:bg-white hover:border-volcano-orange/40">
                   <div className="text-2xl mb-2">{icon}</div>
-                  <h4 className="text-sm font-bold text-[#4a1511] mb-1.5">{title}</h4>
+                  <h4 className="text-sm font-bold text-volcano-dark mb-1.5">{title}</h4>
                   <p className="text-[11px] md:text-xs text-gray-600 leading-relaxed">{desc}</p>
                 </div>
               ))}
@@ -416,13 +388,13 @@ export default function Home() {
         {/* ── 6. PANDUAN MENGURANGI RISIKO BENCANA ── */}
         <Card>
           <CardTitle icon="📚">Informasi Panduan Mengurangi Risiko Bencana Gunung Meletus</CardTitle>
-          <p className="text-xs text-gray-500 mb-5 border-l-2 border-[#4a1511] pl-3 font-medium">
+          <p className="text-xs text-gray-500 mb-5 border-l-2 border-volcano-orange pl-3 font-medium">
             Ikuti langkah-langkah penting ini untuk melindungi diri dan keluarga dari bahaya letusan gunung meletus.
           </p>
           <div className="space-y-2.5">
             {disasterReductionGuide.map((guide) => (
               <div key={guide.num} className="flex items-start gap-3 p-3 md:p-4 bg-gradient-to-r from-orange-50/50 to-red-50/30 rounded-xl border border-orange-100/50 hover:border-orange-200 transition-colors">
-                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#4a1511] text-white flex items-center justify-center text-xs font-bold">
+                <div className="flex-shrink-0 w-6 h-6 rounded-full bg-volcano-main text-white flex items-center justify-center text-xs font-bold">
                   {guide.num}
                 </div>
                 <p className="text-xs md:text-sm text-gray-800 leading-relaxed pt-0.5">
@@ -434,9 +406,9 @@ export default function Home() {
         </Card>
 
         {/* ── 7. FOOTER INFORMASI RESMI ── */}
-        <div className="bg-[#2a0e0c] text-gray-400 p-6 md:p-8 rounded-3xl flex flex-col lg:flex-row justify-between items-center gap-5 text-center lg:text-left">
+        <div className="bg-volcano-dark text-volcano-sand/70 p-6 md:p-8 rounded-3xl flex flex-col lg:flex-row justify-between items-center gap-5 text-center lg:text-left">
           <div>
-            <h5 className="text-white font-bold mb-1.5 md:text-lg">Portal Siaga Bencana Daerah — Gunung Ruang</h5>
+            <h5 className="text-white font-bold mb-1.5 md:text-lg">YOTA — Siaga Gunung Ruang</h5>
             <p className="text-xs md:text-sm text-gray-400">Pusat Informasi Mitigasi Terintegrasi Berbasis Data PVMBG, BNPB & BMKG.</p>
           </div>
           <div className="flex flex-wrap justify-center lg:justify-end gap-3">
