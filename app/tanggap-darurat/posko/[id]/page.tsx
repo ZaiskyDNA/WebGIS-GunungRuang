@@ -3,14 +3,30 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-// Hati-hati dengan path supabase, sesuaikan ../ jika error
 import { supabase } from '../../../../lib/supabase'; 
+
+interface PoskoDetail {
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  capacity: number;
+  current_refugees: number;
+  status_logistik: string;
+  bayi: number;
+  anak: number;
+  dewasa: number;
+  lansia: number;
+  beras_kg: number;
+  air_liter: number;
+  masker_box: number;
+}
 
 export default function DetailPosko() {
   const params = useParams();
   const poskoId = params.id;
   
-  const [posko, setPosko] = useState<any>(null);
+  const [posko, setPosko] = useState<PoskoDetail | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -29,8 +45,8 @@ export default function DetailPosko() {
     fetchPoskoDetail();
   }, [poskoId]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] font-bold text-[#4a1511] animate-pulse">Memuat Data Posko...</div>;
-  if (!posko) return <div className="min-h-screen flex items-center justify-center bg-[#faf8f5] text-red-500 font-bold">Data Posko Tidak Ditemukan.</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center font-bold text-volcano-dark animate-pulse">Memuat Data Posko...</div>;
+  if (!posko) return <div className="min-h-screen flex items-center justify-center text-red-500 font-bold">Data Posko Tidak Ditemukan.</div>;
 
   const percentageCapacity = Math.min(100, Math.round((posko.current_refugees / posko.capacity) * 100));
   const targetBeras = Math.ceil(posko.current_refugees * 1.2); 
@@ -52,10 +68,10 @@ export default function DetailPosko() {
   };
 
   return (
-    <main className="min-h-screen bg-[#faf8f5] py-8 md:py-12">
+    <main className="min-h-screen py-8 md:py-12">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         
-        <Link href="/tanggap-darurat" className="inline-flex text-[#4a1511] font-bold hover:text-red-800 items-center gap-2 mb-8 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition-all hover:shadow-md">
+        <Link href="/tanggap-darurat" className="inline-flex text-volcano-dark font-bold hover:text-volcano-main items-center gap-2 mb-8 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100 transition-all hover:shadow-md">
           <span>←</span> Kembali ke Peta Evakuasi
         </Link>
 
@@ -63,8 +79,8 @@ export default function DetailPosko() {
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 md:p-10 mb-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-gray-100 pb-8">
             <div>
-              <div className="inline-block bg-[#4a1511]/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-[#4a1511] mb-3">Detail Posko</div>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-[#4a1511] mb-3">{posko.name}</h1>
+              <div className="inline-block bg-volcano-dark/10 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-volcano-dark mb-3">Detail Posko</div>
+              <h1 className="text-3xl md:text-4xl font-extrabold text-volcano-dark mb-3">{posko.name}</h1>
               <p className="text-gray-500 flex items-center gap-2 text-sm font-medium mb-5"><span>📍</span> {posko.address}</p>
               
               {/* TOMBOL RUTE GOOGLE MAPS (BARU) */}
@@ -72,7 +88,7 @@ export default function DetailPosko() {
                 href={`https://www.google.com/maps/dir/?api=1&destination=${posko.lat},${posko.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#4a1511] text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#6b201a] transition-all shadow-md hover:shadow-lg active:scale-95"
+                className="inline-flex items-center gap-2 bg-volcano-main text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-volcano-dark transition-all shadow-md hover:shadow-lg active:scale-95"
               >
                 <span className="text-lg">🗺️</span> Petunjuk Rute (Google Maps)
               </a>
@@ -91,11 +107,11 @@ export default function DetailPosko() {
           <div className="mt-8">
             <div className="flex justify-between items-end mb-3">
               <span className="text-gray-500 font-bold uppercase tracking-widest text-xs">Tingkat Kepenuhan Posko</span>
-              <span className="text-3xl font-black text-[#4a1511]">{posko.current_refugees} <span className="text-sm text-gray-400 font-bold">/ {posko.capacity} Jiwa</span></span>
+              <span className="text-3xl font-black text-volcano-dark">{posko.current_refugees} <span className="text-sm text-gray-400 font-bold">/ {posko.capacity} Jiwa</span></span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden border border-gray-200/50">
               <div 
-                className={`h-full transition-all duration-1000 ease-out ${percentageCapacity >= 100 ? 'bg-red-500' : percentageCapacity > 80 ? 'bg-orange-400' : 'bg-[#4a1511]'}`} 
+                className={`h-full transition-all duration-1000 ease-out ${percentageCapacity >= 100 ? 'bg-red-500' : percentageCapacity > 80 ? 'bg-volcano-orange' : 'bg-volcano-main'}`}
                 style={{ width: `${percentageCapacity}%` }}
               ></div>
             </div>
@@ -106,7 +122,7 @@ export default function DetailPosko() {
           
           {/* Demografi Pengungsi */}
           <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 h-fit">
-            <h2 className="text-xl font-bold text-[#4a1511] mb-6 flex items-center gap-3">
+            <h2 className="text-xl font-bold text-volcano-dark mb-6 flex items-center gap-3">
               <span className="text-2xl">👥</span> Rincian Demografi
             </h2>
             <div className="grid grid-cols-2 gap-4">
@@ -132,10 +148,10 @@ export default function DetailPosko() {
           {/* Rincian Inventaris Logistik Dinamis */}
           <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8">
             <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
-                <h2 className="text-xl font-bold text-[#4a1511] flex items-center gap-3">
+                <h2 className="text-xl font-bold text-volcano-dark flex items-center gap-3">
                   <span className="text-2xl">📦</span> Analitik Logistik
                 </h2>
-                <span className="text-[10px] font-bold bg-[#4a1511]/10 text-[#4a1511] px-3 py-1.5 rounded-full uppercase tracking-widest">
+                <span className="text-[10px] font-bold bg-volcano-dark/10 text-volcano-dark px-3 py-1.5 rounded-full uppercase tracking-widest">
                   Target: 3 Hari
                 </span>
             </div>
@@ -151,11 +167,11 @@ export default function DetailPosko() {
                     <div className="flex items-center gap-4">
                       <span className="text-3xl bg-white p-2 rounded-xl shadow-sm border border-gray-100">{item.icon}</span>
                       <div>
-                        <div className="font-bold text-[#4a1511]">{item.title}</div>
+                        <div className="font-bold text-volcano-dark">{item.title}</div>
                         <div className="text-xs font-medium text-gray-500 mt-0.5">Stok: {item.available} {item.unit} / Target: {item.target} {item.unit}</div>
                       </div>
                     </div>
-                    <div className="text-xl font-black text-[#4a1511]">{item.percent}%</div>
+                    <div className="text-xl font-black text-volcano-dark">{item.percent}%</div>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3 mb-2.5 overflow-hidden">
                     <div className={`h-full transition-all duration-1000 ease-out ${getBarColor(item.percent)}`} style={{ width: `${item.percent}%` }}></div>
