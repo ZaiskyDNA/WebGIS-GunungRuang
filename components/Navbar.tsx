@@ -1,107 +1,100 @@
 "use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+
+const navigation = [
+  { href: "/", label: "Mitigasi" },
+  { href: "/tanggap-darurat", label: "Tanggap darurat" },
+  { href: "/pasca-bencana", label: "Pasca-bencana" },
+];
+
+function BrandMark() {
+  return (
+    <span className="grid size-10 place-items-center rounded-2xl bg-volcano-sand text-volcano-dark shadow-sm" aria-hidden="true">
+      <svg viewBox="0 0 32 32" className="size-6" fill="none">
+        <path d="M4 25 13.2 9.5a3.2 3.2 0 0 1 5.5 0L28 25H4Z" fill="currentColor" opacity=".32" />
+        <path d="m9 25 6.1-10.3a1 1 0 0 1 1.8 0L23 25H9Z" fill="currentColor" />
+        <path d="m13.5 18 2.5-2.8 2.5 2.8" stroke="#EED9B9" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
+}
 
 export default function Navbar() {
   const pathname = usePathname();
-  // State untuk mendeteksi apakah menu HP sedang dibuka atau ditutup
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const isActive = (href: string) => href === "/" ? pathname === href : pathname.startsWith(href);
 
   return (
-    <nav className="bg-volcano-dark text-volcano-sand shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          
-          {/* Logo & Judul */}
-          <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="font-bold text-lg md:text-xl tracking-wider flex items-center gap-2">
-              <span className="text-2xl">🌋</span>  RUANGTANGGUH
-            </Link>
-          </div>
+    <header className="sticky top-0 z-[1000] border-b border-white/10 bg-volcano-dark/95 text-white shadow-[0_8px_30px_rgba(94,0,6,.16)] backdrop-blur-xl">
+      <nav className="yota-shell flex min-h-18 items-center justify-between gap-4" aria-label="Navigasi utama">
+        <Link href="/" className="flex items-center gap-3 rounded-xl" onClick={() => setIsOpen(false)}>
+          <BrandMark />
+          <span>
+            <span className="block text-xl font-black leading-none tracking-[0.18em]">YOTA</span>
+            <span className="mt-1 hidden text-[9px] font-semibold uppercase tracking-[0.16em] text-volcano-sand/80 sm:block">
+              Siaga Gunung Ruang
+            </span>
+          </span>
+        </Link>
 
-          {/* Menu Desktop (Sembunyi di layar HP) */}
-          <div className="hidden md:flex space-x-1 items-center">
-            <Link 
-              href="/" 
-              className={`px-3 py-2 rounded-md text-sm transition ${pathname === '/' ? 'bg-volcano-main font-bold shadow-inner' : 'font-medium hover:bg-volcano-main/50'}`}
+        <div className="hidden items-center gap-1 md:flex">
+          {navigation.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                isActive(item.href)
+                  ? "bg-white text-volcano-dark shadow-sm"
+                  : "text-white/75 hover:bg-white/10 hover:text-white"
+              }`}
             >
-              Pra-Bencana (Mitigasi)
+              {item.label}
             </Link>
-            <Link 
-              href="/tanggap-darurat" 
-              className={`px-3 py-2 rounded-md text-sm transition ${pathname === '/tanggap-darurat' ? 'bg-volcano-main font-bold shadow-inner' : 'font-medium hover:bg-volcano-main/50'}`}
-            >
-              Tanggap Darurat
-            </Link>
-            <Link 
-              href="/pasca-bencana" 
-              className={`px-3 py-2 rounded-md text-sm transition ${pathname === '/pasca-bencana' ? 'bg-volcano-main font-bold shadow-inner' : 'font-medium hover:bg-volcano-main/50'}`}
-            >
-              Pasca-Bencana (Historis)
-            </Link>
-            <Link 
-              href="/login" 
-              className="ml-4 bg-volcano-sand text-volcano-dark hover:bg-white px-4 py-2 rounded-md text-sm font-bold transition shadow-sm"
-            >
-              Login Petugas
-            </Link>
-          </div>
-
-          {/* Tombol Hamburger untuk Mobile (Muncul hanya di layar HP) */}
-          <div className="md:hidden flex items-center">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-volcano-sand hover:text-white focus:outline-none p-2"
-            >
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
+          ))}
+          <Link
+            href="/login"
+            className="ml-2 rounded-xl bg-volcano-sand px-4 py-2.5 text-sm font-bold text-volcano-dark transition hover:bg-white"
+          >
+            Portal petugas
+          </Link>
         </div>
-      </div>
 
-      {/* Menu Dropdown Mobile */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-volcano-main shadow-inner">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col">
-            <Link 
-              href="/" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base ${pathname === '/' ? 'bg-volcano-dark font-bold' : 'font-medium hover:bg-volcano-dark/50'}`}
-            >
-              Pra-Bencana (Mitigasi)
-            </Link>
-            <Link 
-              href="/tanggap-darurat" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base ${pathname === '/tanggap-darurat' ? 'bg-volcano-dark font-bold' : 'font-medium hover:bg-volcano-dark/50'}`}
-            >
-              Tanggap Darurat (Saat Ini)
-            </Link>
-            <Link 
-              href="/pasca-bencana" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`block px-3 py-2 rounded-md text-base ${pathname === '/pasca-bencana' ? 'bg-volcano-dark font-bold' : 'font-medium hover:bg-volcano-dark/50'}`}
-            >
-              Pasca-Bencana (Historis)
-            </Link>
-            <Link 
-              href="/login" 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block mt-4 text-center bg-volcano-sand text-volcano-dark px-3 py-2 rounded-md text-base font-bold shadow-md"
-            >
-              Login Petugas
+        <button
+          type="button"
+          className="grid size-11 place-items-center rounded-xl border border-white/15 bg-white/5 md:hidden"
+          aria-label={isOpen ? "Tutup menu" : "Buka menu"}
+          aria-expanded={isOpen}
+          aria-controls="mobile-navigation"
+          onClick={() => setIsOpen((value) => !value)}
+        >
+          <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            {isOpen ? <path d="m6 6 12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+          </svg>
+        </button>
+      </nav>
+
+      {isOpen && (
+        <div id="mobile-navigation" className="border-t border-white/10 bg-volcano-dark px-4 py-4 md:hidden">
+          <div className="mx-auto flex max-w-7xl flex-col gap-1">
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setIsOpen(false)}
+                className={`rounded-xl px-4 py-3 text-sm font-semibold ${isActive(item.href) ? "bg-white text-volcano-dark" : "text-white/80"}`}
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link href="/login" onClick={() => setIsOpen(false)} className="mt-2 rounded-xl bg-volcano-sand px-4 py-3 text-center text-sm font-bold text-volcano-dark">
+              Portal petugas
             </Link>
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }
