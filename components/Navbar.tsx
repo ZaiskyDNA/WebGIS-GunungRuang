@@ -8,6 +8,7 @@ const navigation = [
   { href: "/", label: "Mitigasi" },
   { href: "/tanggap-darurat", label: "Tanggap darurat" },
   { href: "/pasca-bencana", label: "Pasca-bencana" },
+  { href: "/game", label: "Game" },
 ];
 
 function BrandMark() {
