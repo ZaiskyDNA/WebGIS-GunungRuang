@@ -136,9 +136,10 @@ export default function YotaChat() {
 
   useEffect(() => {
     if (!isOpen) return;
+    const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     messageListRef.current?.scrollTo({
       top: messageListRef.current.scrollHeight,
-      behavior: "smooth",
+      behavior: prefersReduced ? "auto" : "smooth",
     });
   }, [isOpen, isLoading, messages]);
 
