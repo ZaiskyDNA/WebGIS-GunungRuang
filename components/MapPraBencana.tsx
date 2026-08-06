@@ -39,19 +39,25 @@ export default function MapPraBencana() {
   
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  // ── Konfigurasi Ikon
+  // ── Konfigurasi Ikon (DivIcon berbasis CSS — tanpa CDN eksternal)
   const icons = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    const base = "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-";
-    const shadow = "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png";
+
+    const makeIcon = (color: string, label: string) => L.divIcon({
+      className: '',
+      iconSize: [28, 28],
+      iconAnchor: [14, 28],
+      popupAnchor: [0, -28],
+      html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:12px;line-height:1">${label}</span></div>`,
+    });
 
     return {
-      volcano: new L.Icon({ iconUrl: base + 'red.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
-      airport: new L.Icon({ iconUrl: base + 'black.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
-      dropPoint: new L.Icon({ iconUrl: base + 'blue.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
-      centralShelter: new L.Icon({ iconUrl: base + 'gold.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
-      tempShelter: new L.Icon({ iconUrl: base + 'green.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
-      user: new L.Icon({ iconUrl: base + 'violet.png', shadowUrl: shadow, iconSize: [25, 41], iconAnchor: [12, 41] }),
+      volcano: makeIcon('#dc2626', '🌋'),
+      airport: makeIcon('#1f2937', '✈'),
+      dropPoint: makeIcon('#2563eb', '📦'),
+      centralShelter: makeIcon('#eab308', '🏢'),
+      tempShelter: makeIcon('#16a34a', '⛺'),
+      user: makeIcon('#7c3aed', '📍'),
     };
   }, []);
   
