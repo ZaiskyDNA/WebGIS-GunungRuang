@@ -7,13 +7,12 @@ import { SimulationState, createInitialState, triggerEruption } from "../../lib/
 import Controls from "../../components/ui/Controls";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-// Dynamic Import untuk Scene 3D
-const VolcanoScene3D = dynamic(() => import("../../components/Volcanoscene"), {
+// Dynamic Import untuk Simulasi 2D Canvas
+const VolcanoScene2D = dynamic(() => import("../../components/VolcanoScene2D"), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex flex-col items-center justify-center bg-[#050208] text-[#ff6b35] font-mono gap-3 rounded-2xl">
-      <div className="text-5xl animate-bounce">🌋</div>
-      <div className="tracking-[0.2em] text-sm font-bold">MEMUAT MODEL FISIKA 3D...</div>
+      <div className="tracking-[0.2em] text-sm font-bold">MEMUAT MODEL FISIKA 2D...</div>
     </div>
   ),
 });
@@ -148,22 +147,22 @@ export default function PascaBencana() {
         </div>
 
         {/* =========================================
-            SECTION 2: PEMODELAN FISIKA 3D
+            SECTION 2: PEMODELAN FISIKA ERUPSI 2D
             ========================================= */}
         <div className="bg-volcano-dark text-white p-6 md:p-10 rounded-[32px] shadow-2xl relative overflow-hidden mt-8">
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-4 space-y-4">
               <div className="inline-block bg-white/10 p-2 px-3 rounded-full text-xs font-bold uppercase tracking-wider text-orange-300 border border-orange-500/30">Modul Simulasi Geofisika</div>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                Laboratorium 3D
+                Simulasi Erupsi Interaktif
               </h2>
               <p className="text-gray-300 mt-2 text-sm md:text-base leading-relaxed font-light">
-                Eksplorasi interaktif variabel erupsi. Sesuaikan viskositas (kekentalan magma) dan tekanan gas bawah permukaan untuk mensimulasikan dampak muntahan lava Gunung Ruang secara real-time.
+                Eksplorasi interaktif variabel erupsi. Sesuaikan viskositas (kekentalan magma), tekanan gas, dan kecepatan angin untuk mensimulasikan dinamika letusan Gunung Ruang secara real-time.
               </p>
             </div>
 
-            <div className="lg:col-span-8 relative w-full h-[500px] md:h-[700px] bg-[#050208] rounded-3xl overflow-hidden shadow-inner border-4 border-white/5">
-              <VolcanoScene3D simState={simState} onStateChange={handleStateChange} />
+            <div className="lg:col-span-8 relative w-full h-[400px] md:h-[550px] bg-[#050208] rounded-3xl overflow-hidden shadow-inner border-4 border-white/5">
+              <VolcanoScene2D simState={simState} onStateChange={handleStateChange} />
               
               <Controls
                 state={simState}

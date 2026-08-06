@@ -5,8 +5,8 @@ import dynamic from "next/dynamic";
 import { SimulationState, createInitialState, triggerEruption } from "../../lib/simulation";
 import Controls from "../../components/ui/Controls";
 
-// Dynamic import to avoid SSR issues with Three.js
-const VolcanoScene = dynamic(() => import("../../components/Volcanoscene"), {
+// Dynamic import of 2D Canvas Visualizer
+const VolcanoScene = dynamic(() => import("../../components/VolcanoScene2D"), {
   ssr: false,
   loading: () => (
     <div style={{
@@ -16,14 +16,13 @@ const VolcanoScene = dynamic(() => import("../../components/Volcanoscene"), {
       alignItems: "center",
       justifyContent: "center",
       background: "#050208",
-      fontFamily: "'Courier New', monospace",
+      fontFamily: "sans-serif",
       color: "#ff6b35",
       flexDirection: "column",
       gap: "12px",
     }}>
-      <div style={{ fontSize: 40 }}>🌋</div>
-      <div style={{ letterSpacing: "0.2em", fontSize: 14 }}>MEMUAT SIMULASI...</div>
-      <div style={{ fontSize: 11, color: "#666" }}>Gunung Ruang Eruption Model 2024</div>
+      <div style={{ letterSpacing: "0.2em", fontSize: 14, fontWeight: "bold" }}>MEMUAT SIMULASI...</div>
+      <div style={{ fontSize: 11, color: "#888" }}>Gunung Ruang Eruption Model 2024</div>
     </div>
   ),
 });
