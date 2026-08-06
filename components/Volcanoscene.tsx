@@ -13,10 +13,14 @@ interface VolcanoSceneProps {
   onStateChange: (state: SimulationState) => void;
 }
 
-const MAX_LAVA_PARTICLES = 800;
-const MAX_ASH_PARTICLES = 1500;
-const MAX_SMOKE_PARTICLES = 400;
-const MAX_EMBER_PARTICLES = 300;
+// Detect mobile for performance scaling (runs once at module load)
+const IS_MOBILE = typeof window !== "undefined" && (window.innerWidth < 768 || "ontouchstart" in window);
+const PERF_SCALE = IS_MOBILE ? 0.5 : 1;
+
+const MAX_LAVA_PARTICLES = Math.round(800 * PERF_SCALE);
+const MAX_ASH_PARTICLES = Math.round(1500 * PERF_SCALE);
+const MAX_SMOKE_PARTICLES = Math.round(400 * PERF_SCALE);
+const MAX_EMBER_PARTICLES = Math.round(300 * PERF_SCALE);
 
 export default function VolcanoScene({ simState, onStateChange }: VolcanoSceneProps) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -291,11 +295,11 @@ export default function VolcanoScene({ simState, onStateChange }: VolcanoScenePr
     camera.lookAt(0, 10, 0);
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: !IS_MOBILE });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFShadowMap; 
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, IS_MOBILE ? 1.5 : 2));
+    renderer.shadowMap.enabled = !IS_MOBILE;
+    if (!IS_MOBILE) renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2; 
     mount.appendChild(renderer.domElement);
