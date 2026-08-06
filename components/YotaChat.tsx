@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 
 type ChatRole = "user" | "assistant";
@@ -128,6 +129,7 @@ function FormattedMessage({ content, isUser }: { content: string; isUser: boolea
 }
 
 export default function YotaChat() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
@@ -202,6 +204,8 @@ export default function YotaChat() {
       void sendMessage(input);
     }
   };
+
+  if (pathname === "/game") return null;
 
   return (
     <div className="fixed bottom-5 right-4 z-[5000] sm:right-6">
@@ -412,4 +416,3 @@ export default function YotaChat() {
     </div>
   );
 }
-
