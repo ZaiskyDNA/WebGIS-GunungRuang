@@ -135,12 +135,13 @@ export default function PascaBencana() {
             {/* Wadah Gambar veiscala.jpg */}
             <div className="w-full flex-1 relative flex items-center justify-center bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden p-4">
               <Image
-                src="/veiscala.jpg"
+                src="/veiscala.webp"
                 alt="Infografis Skala Volcanic Explosivity Index (VEI)" 
-                width={900}
-                height={600}
+                width={590}
+                height={912}
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="w-full h-full object-contain mix-blend-multiply"
+                priority
               />
             </div>
           </div>
