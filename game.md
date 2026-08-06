@@ -1,19 +1,19 @@
 # Product Requirements Document
 
-## Merapi Escape — Lightweight Vertical Survival Game
+## Ruang Escape — Lightweight Vertical Survival Game
 
 **Versi:** 1.0
 **Status:** Draft Implementasi
 **Platform:** Website
 **Tipe aplikasi:** Mini-game 2D berbasis browser
 **Teknologi utama:** HTML5 Canvas, CSS, dan JavaScript
-**Integrasi:** Website WebGIS bencana Gunung Merapi
+**Integrasi:** Website WebGIS bencana Gunung Ruang
 
 ---
 
 ## 1. Ringkasan Produk
 
-**Merapi Escape** adalah mini-game survival vertikal yang ditempatkan pada website WebGIS bencana Gunung Merapi.
+**Ruang Escape** adalah mini-game survival vertikal yang ditempatkan pada website WebGIS bencana Gunung Ruang.
 
 Pemain mengendalikan karakter yang bergerak ke arah atas untuk menghindari lava yang terus naik dari bawah layar. Selama permainan, pemain harus menghindari berbagai rintangan seperti batu vulkanik, pohon tumbang, retakan tanah, dan aliran lahar.
 
@@ -30,7 +30,7 @@ Game tidak menggunakan game engine besar, model 3D, video, atau physics engine e
 Membuat mini-game sederhana yang:
 
 1. Menambah interaktivitas pada website WebGIS.
-2. Memberikan pengalaman edukatif mengenai bahaya erupsi Gunung Merapi.
+2. Memberikan pengalaman edukatif mengenai bahaya erupsi Gunung Ruang.
 3. Dapat dimainkan dengan mudah oleh pengguna umum.
 4. Tidak membuat halaman WebGIS menjadi berat.
 5. Dapat berjalan dengan baik pada desktop dan perangkat seluler.
@@ -89,16 +89,16 @@ Permainan berakhir ketika:
 
 Nama utama:
 
-**Merapi Escape**
+**Ruang Escape**
 
 Alternatif nama:
 
 * Lari dari Lava
-* Merapi Rush
-* Escape Merapi
-* Merapi Survival
+* Ruang Rush
+* Escape Ruang
+* Ruang Survival
 * Lava Chase
-* Merapi Evacuation Run
+* Ruang Evacuation Run
 
 Nama dapat diganti tanpa memengaruhi mekanisme game.
 
@@ -150,7 +150,7 @@ Fitur berikut tidak termasuk dalam implementasi versi pertama:
 * cutscene;
 * sistem inventaris;
 * karakter dengan banyak animasi kompleks;
-* integrasi langsung dengan data real-time aktivitas Merapi.
+* integrasi langsung dengan data real-time aktivitas Ruang.
 
 Fitur-fitur tersebut dapat dipertimbangkan pada versi berikutnya.
 
@@ -221,7 +221,7 @@ WebGIS
   ├── Beranda
   ├── Peta Bencana
   ├── Informasi Mitigasi
-  └── Game Merapi Escape
+  └── Game Ruang Escape
 ```
 
 ---
@@ -574,7 +574,7 @@ Skor tertinggi disimpan menggunakan `localStorage`.
 Contoh key:
 
 ```javascript
-const HIGH_SCORE_KEY = "merapiEscapeHighScore";
+const HIGH_SCORE_KEY = "ruangEscapeHighScore";
 ```
 
 Contoh penyimpanan:
@@ -901,7 +901,7 @@ Game loop hanya memperbarui gameplay saat state bernilai `PLAYING`.
 Struktur berikut direkomendasikan:
 
 ```text
-merapi-escape/
+ruang-escape/
 ├── index.html
 ├── README.md
 ├── assets/
@@ -1617,7 +1617,7 @@ Hasil yang diharapkan:
 Gunakan instruksi berikut selama implementasi:
 
 ```text
-Bangun mini-game 2D berbasis HTML5 Canvas bernama Merapi Escape.
+Bangun mini-game 2D berbasis HTML5 Canvas bernama Ruang Escape.
 
 Game berupa vertical survival runner. Pemain bergerak ke kiri dan kanan,
 sementara lingkungan bergerak ke bawah untuk menciptakan ilusi bahwa
@@ -1775,9 +1775,9 @@ Semua penambahan harus mempertahankan prinsip utama bahwa game tetap ringan.
 
 Game harus menyertakan disclaimer berikut:
 
-> Merapi Escape merupakan permainan edukasi sederhana. Informasi di dalam game tidak menggantikan arahan resmi dari BPBD, PVMBG, pemerintah daerah, atau petugas kebencanaan.
+> Ruang Escape merupakan permainan edukasi sederhana. Informasi di dalam game tidak menggantikan arahan resmi dari BPBD, PVMBG, pemerintah daerah, atau petugas kebencanaan.
 
-Jangan menampilkan informasi status aktivitas Gunung Merapi secara real-time kecuali data berasal dari sumber resmi dan telah melalui mekanisme validasi.
+Jangan menampilkan informasi status aktivitas Gunung Ruang secara real-time kecuali data berasal dari sumber resmi dan telah melalui mekanisme validasi.
 
 Jangan menggunakan game untuk memberikan keputusan evakuasi yang sebenarnya.
 
@@ -1832,14 +1832,14 @@ Gunakan urutan prioritas berikut:
 
 ## 53. Kesimpulan
 
-Merapi Escape harus menjadi mini-game yang:
+Ruang Escape harus menjadi mini-game yang:
 
 * mudah dipahami;
 * cepat dimainkan;
 * ringan;
 * edukatif;
 * menarik secara visual;
-* relevan dengan tema Gunung Merapi;
+* relevan dengan tema Gunung Ruang;
 * mudah diintegrasikan ke website WebGIS.
 
 Versi pertama harus berfokus pada pengalaman inti:

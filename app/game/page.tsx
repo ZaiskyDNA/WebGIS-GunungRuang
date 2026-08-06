@@ -9,9 +9,9 @@ import Image from "next/image";
 // ==========================================
 const CANVAS_WIDTH = 360;
 const CANVAS_HEIGHT = 640;
-const HIGH_SCORE_KEY = "merapi_escape_highscore";
-const ACHIEVEMENTS_KEY = "merapi_escape_achievements";
-const SOUND_KEY = "merapi_escape_sound";
+const HIGH_SCORE_KEY = "ruang_escape_highscore";
+const ACHIEVEMENTS_KEY = "ruang_escape_achievements";
+const SOUND_KEY = "ruang_escape_sound";
 
 const MITIGATION_TIPS = [
   "Saat terjadi erupsi eksplosif, segera gunakan masker N95 untuk melindungi saluran pernapasan dari silika abu vulkanik.",
@@ -34,7 +34,7 @@ const CHECKPOINTS_DATA: Checkpoint[] = [
   { distance: 250, name: "Posko 1: Desa Bahoi", bonusScore: 1000, reached: false },
   { distance: 500, name: "Posko 2: Tagulandang", bonusScore: 2000, reached: false },
   { distance: 750, name: "Posko 3: Pelabuhan Evakuasi", bonusScore: 3500, reached: false },
-  { distance: 1000, name: "Posko Utama: ZONA SAFE REFUGE", bonusScore: 5000, reached: false }
+  { distance: 1000, name: "Posko Utama: ZONA REFUGE", bonusScore: 5000, reached: false }
 ];
 
 // Difficulty Presets
@@ -57,7 +57,7 @@ const DIFFICULTY_SETTINGS: Record<DifficultyMode, DifficultyConfig> = {
   SANTAI: {
     name: "SANTAI",
     label: "Mode Santai (Easy)",
-    badge: "🌱 Pemula",
+    badge: "🌱 Easy",
     color: "text-emerald-400",
     border: "border-emerald-500/40",
     baseWorldSpeed: 130,
@@ -69,7 +69,7 @@ const DIFFICULTY_SETTINGS: Record<DifficultyMode, DifficultyConfig> = {
   SIAGA: {
     name: "SIAGA",
     label: "Mode Siaga (Normal)",
-    badge: "🟡 Standar",
+    badge: "🟡 Normal",
     color: "text-amber-400",
     border: "border-amber-500/40",
     baseWorldSpeed: 155,
@@ -81,7 +81,7 @@ const DIFFICULTY_SETTINGS: Record<DifficultyMode, DifficultyConfig> = {
   AWAS: {
     name: "AWAS",
     label: "Mode AWAS (Hardcore)",
-    badge: "🔥 Extreme",
+    badge: "🔥 Hardcore",
     color: "text-rose-400",
     border: "border-rose-500/50",
     baseWorldSpeed: 185,
@@ -97,22 +97,22 @@ interface Achievement {
   id: string;
   title: string;
   desc: string;
-  icon: string;
+  tag: string;
   tier: "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
   unlocked: boolean;
 }
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: "checkpoint_1", title: "Penyintas Pertama", desc: "Tiba di Posko 1 Desa Bahoi (250m)", icon: "🏕️", tier: "BRONZE", unlocked: false },
-  { id: "checkpoint_2", title: "Penyintas Tagulandang", desc: "Tiba di Posko 2 Tagulandang (500m)", icon: "🚁", tier: "SILVER", unlocked: false },
-  { id: "checkpoint_3", title: "Master Evakuasi Sitaro", desc: "Tiba di Posko 3 Pelabuhan (750m)", icon: "🛳️", tier: "GOLD", unlocked: false },
-  { id: "checkpoint_4", title: "Pahlawan RuangTangguh", desc: "Tiba di Posko Utama Refuge (1.000m)", icon: "👑", tier: "PLATINUM", unlocked: false },
-  { id: "dodge_5", title: "Refleks Kilat", desc: "Lakukan 5 Near-Miss Dodge dalam 1 run", icon: "⚡", tier: "BRONZE", unlocked: false },
-  { id: "dodge_12", title: "Dodge Master Supreme", desc: "Lakukan 12 Near-Miss Dodge dalam 1 run!", icon: "🥋", tier: "GOLD", unlocked: false },
-  { id: "score_5000", title: "Penyelamat Tangguh", desc: "Raih skor 5.000 Poin", icon: "🏆", tier: "SILVER", unlocked: false },
-  { id: "score_10000", title: "Legenda Evakuasi", desc: "Raih skor 10.000 Poin!", icon: "💎", tier: "PLATINUM", unlocked: false },
-  { id: "shield_collector", title: "Benteng Kokoh", desc: "Kumpulkan 3 Perisai Evakuasi dalam 1 run", icon: "🛡️", tier: "SILVER", unlocked: false },
-  { id: "mode_awas_extreme", title: "Penakluk Level AWAS", desc: "Raih >2.500 Poin di Mode AWAS (Hardcore)", icon: "🔥", tier: "PLATINUM", unlocked: false }
+  { id: "checkpoint_1", title: "Penyintas Pertama", desc: "Tiba di Posko 1 Desa Bahoi (250m)", tag: "🏕️ CP1", tier: "BRONZE", unlocked: false },
+  { id: "checkpoint_2", title: "Penyintas Tagulandang", desc: "Tiba di Posko 2 Tagulandang (500m)", tag: "🚁 CP2", tier: "SILVER", unlocked: false },
+  { id: "checkpoint_3", title: "Master Evakuasi Sitaro", desc: "Tiba di Posko 3 Pelabuhan (750m)", tag: "🛳️ CP3", tier: "GOLD", unlocked: false },
+  { id: "checkpoint_4", title: "Pahlawan RuangTangguh", desc: "Tiba di Posko Utama Refuge (1.000m)", tag: "👑 MAX", tier: "PLATINUM", unlocked: false },
+  { id: "dodge_5", title: "Refleks Kilat", desc: "Lakukan 5 Near-Miss Dodge dalam 1 run", tag: "⚡ D5", tier: "BRONZE", unlocked: false },
+  { id: "dodge_12", title: "Dodge Master Supreme", desc: "Lakukan 12 Near-Miss Dodge dalam 1 run!", tag: "🥋 D12", tier: "GOLD", unlocked: false },
+  { id: "score_5000", title: "Penyelamat Tangguh", desc: "Raih skor 5.000 Poin", tag: "🏆 5K", tier: "SILVER", unlocked: false },
+  { id: "score_10000", title: "Legenda Evakuasi", desc: "Raih skor 10.000 Poin!", tag: "💎 10K", tier: "PLATINUM", unlocked: false },
+  { id: "shield_collector", title: "Benteng Kokoh", desc: "Kumpulkan 3 Perisai Evakuasi dalam 1 run", tag: "🛡️ SH3", tier: "SILVER", unlocked: false },
+  { id: "mode_awas_extreme", title: "Penakluk Level AWAS", desc: "Raih >2.500 Poin di Mode AWAS (Hardcore)", tag: "🔥 AWS", tier: "PLATINUM", unlocked: false }
 ];
 
 // ==========================================
@@ -424,7 +424,6 @@ export default function GamePage() {
       if (savedAch) {
         try {
           const parsed = JSON.parse(savedAch);
-          // Merge with DEFAULT_ACHIEVEMENTS to maintain tier & icon definitions
           const merged = DEFAULT_ACHIEVEMENTS.map((def) => {
             const found = parsed.find((p: Achievement) => p.id === def.id);
             return found ? { ...def, unlocked: found.unlocked } : def;
@@ -638,8 +637,8 @@ export default function GamePage() {
       playSound("alarm", soundEnabledRef.current);
       floatingTextsRef.current.push({
         id: Date.now(),
-        text: "⚠️ ERUPSI SUSULAN!",
-        x: CANVAS_WIDTH / 2 - 60,
+        text: "ERUPSI SUSULAN!",
+        x: CANVAS_WIDTH / 2 - 55,
         y: CANVAS_HEIGHT - 120,
         opacity: 1.5,
         color: "#ef4444"
@@ -708,7 +707,7 @@ export default function GamePage() {
           playSound("dodge", soundEnabledRef.current);
           floatingTextsRef.current.push({
             id: Date.now() + Math.random(),
-            text: "⚡ DODGE! +120",
+            text: "DODGE! +120",
             x: player.x - 10,
             y: player.y - 15,
             opacity: 1,
@@ -813,7 +812,7 @@ export default function GamePage() {
     };
 
     if (lavaYRef.current <= player.y + player.height - 18) {
-      triggerGameOver("Lava vulkanik mengejarmu dari belakang!");
+      triggerGameOver("Aliran lava meluap dari belakang!");
       return;
     }
 
@@ -828,7 +827,7 @@ export default function GamePage() {
             bomb.y = CANVAS_HEIGHT + 200;
             playSound("crash", soundEnabledRef.current);
           } else {
-            triggerGameOver("Kamu dihantam bom batu pijar vulkanik!");
+            triggerGameOver("Hantaman bom vulkanik!");
             return;
           }
         }
@@ -875,7 +874,7 @@ export default function GamePage() {
             playSound("crash", soundEnabledRef.current);
           } else {
             lavaTargetYRef.current -= 45;
-            triggerGameOver("Kamu menabrak batu vulkanik raksasa!");
+            triggerGameOver("Menabrak batu vulkanik!");
             return;
           }
         }
@@ -892,7 +891,7 @@ export default function GamePage() {
               playSound("crash", soundEnabledRef.current);
             } else {
               lavaTargetYRef.current -= 45;
-              triggerGameOver("Kamu terhalang pohon tumbang dan tidak menemukan celah evakuasi!");
+              triggerGameOver("Terhalang pohon tumbang!");
               return;
             }
           }
@@ -911,7 +910,7 @@ export default function GamePage() {
     }
   };
 
-  // Trigger Game Over Sequence & Check Challenging Achievements
+  // Trigger Game Over Sequence & Check Achievements
   const triggerGameOver = (cause: string) => {
     playSound("crash", soundEnabledRef.current);
     setTimeout(() => playSound("gameover", soundEnabledRef.current), 200);
@@ -934,7 +933,6 @@ export default function GamePage() {
       }
     }
 
-    // Check & Unlock 10 Challenging Achievements
     const updatedAchievements = achievements.map((ach) => {
       let isUnlocked = ach.unlocked;
       if (ach.id === "checkpoint_1" && finalDist >= 250) isUnlocked = true;
@@ -961,7 +959,7 @@ export default function GamePage() {
   };
 
   // ==========================================
-  // 5. CANVAS RENDERER LOGIC
+  // 5. CLEAN VECTOR CANVAS RENDERER LOGIC
   // ==========================================
   const render = () => {
     const canvas = canvasRef.current;
@@ -971,13 +969,16 @@ export default function GamePage() {
 
     ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+    // Background track
     ctx.fillStyle = "#1e1315";
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+    // Track side borders
     ctx.fillStyle = "#4a2428";
     ctx.fillRect(0, 0, 16, CANVAS_HEIGHT);
     ctx.fillRect(CANVAS_WIDTH - 16, 0, 16, CANVAS_HEIGHT);
 
+    // Dashed center lane
     ctx.strokeStyle = "rgba(238, 217, 185, 0.2)";
     ctx.lineWidth = 3;
     ctx.setLineDash([16, 22]);
@@ -987,6 +988,7 @@ export default function GamePage() {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // Ash particles
     particlesRef.current.forEach((p) => {
       ctx.fillStyle = `rgba(255, 220, 200, ${p.opacity})`;
       ctx.beginPath();
@@ -994,20 +996,22 @@ export default function GamePage() {
       ctx.fill();
     });
 
+    // Volcanic Bombs (Target reticle + Falling meteor shape)
     bombsRef.current.forEach((bomb) => {
       if (bomb.warningTime > 0) {
         ctx.strokeStyle = "rgba(239, 68, 68, 0.85)";
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(bomb.x, bomb.targetY, bomb.radius + 6, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.fillStyle = "rgba(239, 68, 68, 0.25)";
+        ctx.fillStyle = "rgba(239, 68, 68, 0.2)";
         ctx.fill();
 
         ctx.fillStyle = "#ef4444";
-        ctx.font = "bold 11px sans-serif";
-        ctx.fillText("⚠️ BOM VULKANIK", bomb.x - 45, bomb.targetY - bomb.radius - 8);
+        ctx.font = "bold 10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("BOM VULKANIK", bomb.x, bomb.targetY - bomb.radius - 8);
       } else {
         const curY = bomb.impacted ? bomb.targetY : bomb.y;
         ctx.fillStyle = "#ff4500";
@@ -1018,11 +1022,18 @@ export default function GamePage() {
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        ctx.font = "bold 22px sans-serif";
-        ctx.fillText("☄️", bomb.x - 14, curY + 8);
+        // Inner glowing core
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(bomb.x - 4, curY - 4, bomb.radius * 0.35, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = "20px sans-serif";
+        ctx.fillText("☄️", bomb.x - 12, curY + 7);
       }
     });
 
+    // Obstacles
     obstaclesRef.current.forEach((obs) => {
       if (obs.type === "ROCK") {
         ctx.fillStyle = "#332c2e";
@@ -1033,6 +1044,7 @@ export default function GamePage() {
         ctx.lineWidth = 2.5;
         ctx.stroke();
 
+        // Glowing fissure pattern
         ctx.strokeStyle = "#ff6b00";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
@@ -1041,7 +1053,7 @@ export default function GamePage() {
         ctx.lineTo(obs.x + 30, obs.y + 28);
         ctx.stroke();
 
-        ctx.font = "bold 16px sans-serif";
+        ctx.font = "16px sans-serif";
         ctx.fillText("🪨", obs.x + 9, obs.y + 25);
 
       } else if (obs.type === "TREE") {
@@ -1064,7 +1076,8 @@ export default function GamePage() {
 
         ctx.fillStyle = "#86efac";
         ctx.font = "bold 10px sans-serif";
-        ctx.fillText("⬇ JALUR AMAN ⬇", (obs.gapX || 0) + (obs.gapWidth || 0) / 2 - 40, obs.y + 16);
+        ctx.textAlign = "center";
+        ctx.fillText("JALUR AMAN", (obs.gapX || 0) + (obs.gapWidth || 0) / 2, obs.y + 16);
 
       } else if (obs.type === "CRACK") {
         ctx.fillStyle = "rgba(20, 5, 8, 0.85)";
@@ -1077,50 +1090,47 @@ export default function GamePage() {
 
         ctx.fillStyle = "#ef4444";
         ctx.font = "bold 10px sans-serif";
-        ctx.fillText("⚠️ SLOW", obs.x + 8, obs.y + 26);
+        ctx.textAlign = "center";
+        ctx.fillText("SLOW", obs.x + obs.width / 2, obs.y + obs.height / 2 + 3);
       }
     });
 
+    // Items (Clean vector circles + clean typography labels)
     itemsRef.current.forEach((item) => {
       ctx.save();
-      ctx.shadowBlur = 10;
+      const cx = item.x + item.width / 2;
+      const cy = item.y + item.height / 2;
+      const r = item.width / 2;
+
       if (item.type === "MASK") {
-        ctx.shadowColor = "#eed9b9";
         ctx.fillStyle = "#eed9b9";
         ctx.beginPath();
-        ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 2, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.font = "bold 20px sans-serif";
-        ctx.fillText("😷", item.x + 7, item.y + 26);
-        ctx.fillStyle = "#eed9b9";
-        ctx.font = "bold 10px sans-serif";
-        ctx.fillText("+500", item.x + 3, item.y - 4);
+        ctx.font = "18px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("😷", cx, cy + 6);
       } else if (item.type === "SHIELD") {
-        ctx.shadowColor = "#38bdf8";
         ctx.fillStyle = "#0284c7";
         ctx.beginPath();
-        ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 2, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.font = "bold 20px sans-serif";
-        ctx.fillText("🛡️", item.x + 7, item.y + 26);
-        ctx.fillStyle = "#38bdf8";
-        ctx.font = "bold 10px sans-serif";
-        ctx.fillText("PERISAI", item.x - 2, item.y - 4);
+        ctx.font = "18px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("🛡️", cx, cy + 6);
       } else if (item.type === "BOOTS") {
-        ctx.shadowColor = "#22c55e";
         ctx.fillStyle = "#15803d";
         ctx.beginPath();
-        ctx.arc(item.x + item.width / 2, item.y + item.height / 2, item.width / 2, 0, Math.PI * 2);
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.fill();
-        ctx.font = "bold 20px sans-serif";
-        ctx.fillText("⚡", item.x + 7, item.y + 26);
-        ctx.fillStyle = "#4ade80";
-        ctx.font = "bold 10px sans-serif";
-        ctx.fillText("SPEED", item.x + 1, item.y - 4);
+        ctx.font = "18px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("⚡", cx, cy + 6);
       }
       ctx.restore();
     });
 
+    // Mascot / Player
     const player = playerRef.current;
     ctx.save();
     ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
@@ -1152,33 +1162,37 @@ export default function GamePage() {
     }
     ctx.restore();
 
+    // Floating text notifications
     floatingTextsRef.current.forEach((ft) => {
       ctx.save();
       ctx.fillStyle = ft.color;
-      ctx.font = "bold 14px sans-serif";
+      ctx.font = "bold 13px sans-serif";
+      ctx.textAlign = "center";
       ctx.globalAlpha = Math.max(0, ft.opacity);
       ctx.fillText(ft.text, ft.x, ft.y);
       ctx.restore();
     });
 
+    // Checkpoint Banner
     if (currentCheckpointBannerRef.current) {
       const banner = currentCheckpointBannerRef.current;
       ctx.save();
-      ctx.fillStyle = "rgba(16, 185, 129, 0.88)";
-      ctx.fillRect(20, 80, CANVAS_WIDTH - 40, 60);
+      ctx.fillStyle = "rgba(16, 185, 129, 0.92)";
+      ctx.fillRect(20, 80, CANVAS_WIDTH - 40, 56);
       ctx.strokeStyle = "#4ade80";
       ctx.lineWidth = 2;
-      ctx.strokeRect(20, 80, CANVAS_WIDTH - 40, 60);
+      ctx.strokeRect(20, 80, CANVAS_WIDTH - 40, 56);
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "bold 12px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(`🎉 CHECKPOINT ZONA AMAN!`, CANVAS_WIDTH / 2, 102);
+      ctx.fillText("🎉 CHECKPOINT ZONA AMAN!", CANVAS_WIDTH / 2, 102);
       ctx.font = "bold 11px sans-serif";
-      ctx.fillText(`${banner.name} (+${banner.bonus} Pts)`, CANVAS_WIDTH / 2, 124);
+      ctx.fillText(`${banner.name} (+${banner.bonus} Pts)`, CANVAS_WIDTH / 2, 122);
       ctx.restore();
     }
 
+    // Lava Rising Wave
     const lavaY = lavaYRef.current;
     const lavaGradient = ctx.createLinearGradient(0, lavaY, 0, CANVAS_HEIGHT);
     lavaGradient.addColorStop(0, "#ff6b00");
@@ -1206,35 +1220,35 @@ export default function GamePage() {
   };
 
   return (
-    <main className="min-h-[calc(100vh-4.5rem)] bg-[#120406] text-white py-6 px-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <main className="min-h-[calc(100vh-4.5rem)] bg-[#120406] text-white py-3 sm:py-6 px-2 sm:px-4">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
 
-        {/* Header Title */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+        {/* Compact Header Title */}
+        <div className="flex flex-row items-center justify-between gap-3 p-3 sm:p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="relative size-10 rounded-full overflow-hidden border border-volcano-orange/50">
-              <Image src="/maskot.webp" alt="Yota Mascot" fill className="object-cover" />
+            <div className="relative size-9 sm:size-10 rounded-full overflow-hidden border border-volcano-orange/50 shrink-0 flex items-center justify-center">
+              <Image src="/maskot.webp" alt="Yota Mascot" width={40} height={40} className="object-cover size-full" />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-black text-volcano-sand tracking-wide">
-                MERAPI & RUANG ESCAPE
+              <h1 className="text-base sm:text-2xl font-black text-volcano-sand tracking-wide">
+                RUANG ESCAPE
               </h1>
-              <p className="text-xs text-white/70">
-                2D Lava Survival Runner — Checkpoint Evakuasi & Tantangan Lencana
+              <p className="hidden sm:block text-xs text-white/70">
+                2D Lava Survival Runner — Evakuasi & Tantangan Lencana
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleSound}
-              className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold flex items-center gap-2 transition"
+              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold transition"
             >
               {soundEnabled ? "🔊 Suara: ON" : "🔇 Suara: OFF"}
             </button>
             {highScore > 0 && (
-              <div className="px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
-                🏆 High Score: {highScore}
+              <div className="px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold whitespace-nowrap">
+                🏆 Top Score: {highScore}
               </div>
             )}
           </div>
@@ -1243,15 +1257,13 @@ export default function GamePage() {
         {/* DUAL RESPONSIVE LAYOUT CONTAINER */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          {/* ======================================================== */}
-          {/* DESKTOP SIDEBAR LEFT: MODE SELECTOR & CHECKPOINTS        */}
-          {/* ======================================================== */}
+          {/* DESKTOP SIDEBAR LEFT: MODE SELECTOR & CHECKPOINTS */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-4">
             
             {/* Difficulty Selector Card */}
             <div className="p-4 rounded-3xl bg-white/5 border border-white/10 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand flex items-center gap-2">
-                ⚙️ Tingkat Kesulitan
+              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand">
+                Tingkat Kesulitan
               </h3>
               <div className="space-y-2">
                 {(Object.keys(DIFFICULTY_SETTINGS) as DifficultyMode[]).map((key) => {
@@ -1283,8 +1295,8 @@ export default function GamePage() {
 
             {/* Checkpoint Milestones Progress Card */}
             <div className="p-4 rounded-3xl bg-white/5 border border-white/10 space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand flex items-center gap-2">
-                🏕️ Posko Checkpoint Evakuasi
+              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand">
+                Posko Checkpoint Evakuasi
               </h3>
               <div className="space-y-2 text-xs">
                 {CHECKPOINTS_DATA.map((cp) => {
@@ -1308,10 +1320,8 @@ export default function GamePage() {
 
           </div>
 
-          {/* ======================================================== */}
-          {/* CENTER COLUMN: MAIN CANVAS ARCADE CABINET                */}
-          {/* ======================================================== */}
-          <div className="lg:col-span-6 flex flex-col items-center">
+          {/* CENTER COLUMN: MAIN CANVAS ARCADE CABINET */}
+          <div className="lg:col-span-6 flex flex-col items-center w-full">
             
             {/* Mobile Mode Switcher (Visible only on Mobile) */}
             <div className="w-full max-w-[360px] mb-3 grid grid-cols-3 gap-2 lg:hidden">
@@ -1339,12 +1349,9 @@ export default function GamePage() {
               
               {/* Arcade Topbar */}
               <div className="w-full px-4 py-3 bg-black/50 border-b border-white/10 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🌋</span>
-                  <div>
-                    <h2 className="text-xs font-black text-volcano-sand tracking-wide">YOTA ARCADE</h2>
-                    <p className="text-[9px] text-white/50">{DIFFICULTY_SETTINGS[difficulty].label}</p>
-                  </div>
+                <div>
+                  <h2 className="text-xs font-black text-volcano-sand tracking-wide">YOTA RUNNER</h2>
+                  <p className="text-[9px] text-white/50">{DIFFICULTY_SETTINGS[difficulty].label}</p>
                 </div>
 
                 {gameState === "PLAYING" && (
@@ -1352,7 +1359,7 @@ export default function GamePage() {
                     onClick={() => setGameState("PAUSED")}
                     className="px-3 py-1 rounded-xl bg-volcano-orange hover:bg-volcano-main text-[11px] font-bold transition"
                   >
-                    ⏸ Pause
+                    Pause
                   </button>
                 )}
               </div>
@@ -1378,32 +1385,32 @@ export default function GamePage() {
 
                 {/* 1. START MENU OVERLAY */}
                 {gameState === "MENU" && (
-                  <div className="absolute inset-0 bg-volcano-dark/95 backdrop-blur-md p-6 flex flex-col items-center justify-between text-center z-20">
-                    <div className="my-auto space-y-4 max-w-xs flex flex-col items-center">
-                      <div className="relative size-20 p-2 rounded-3xl bg-volcano-orange/20 border border-volcano-orange/40 shadow-xl overflow-hidden flex items-center justify-center">
-                        <Image src="/maskot.webp" alt="Yota Mascot" width={70} height={70} className="object-contain" priority />
+                  <div className="absolute inset-0 bg-volcano-dark/95 backdrop-blur-md p-5 flex flex-col items-center justify-between text-center z-20 max-h-full overflow-y-auto">
+                    <div className="my-auto space-y-3 max-w-xs flex flex-col items-center">
+                      <div className="relative size-16 p-2 rounded-2xl bg-volcano-orange/20 border border-volcano-orange/40 shadow-xl overflow-hidden flex items-center justify-center">
+                        <Image src="/maskot.webp" alt="Yota Mascot" width={56} height={56} className="object-contain" priority />
                       </div>
 
                       <div>
                         <span className="text-[10px] font-bold uppercase tracking-widest text-volcano-sand">Lava Survival Runner</span>
-                        <h2 className="text-2xl font-black text-white mt-0.5">MERAPI ESCAPE</h2>
-                        <p className="text-xs text-white/70 mt-1.5 leading-relaxed">
-                          Bantu YOTA berlari menuju Checkpoint Posko Evakuasi! Sentuh langsung layar untuk mengarahkan YOTA.
+                        <h2 className="text-xl font-black text-white mt-0.5">RUANG ESCAPE</h2>
+                        <p className="text-xs text-white/70 mt-1 leading-relaxed">
+                          Bantu YOTA berlari menuju Checkpoint Posko Evakuasi! Sentuh langsung layar untuk mengarahkan.
                         </p>
                       </div>
 
-                      <div className="w-full space-y-2 pt-2">
+                      <div className="w-full space-y-2 pt-1">
                         <button
                           onClick={startCountdown}
-                          className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-volcano-orange to-volcano-main text-white font-black text-sm shadow-lg hover:scale-[1.02] active:scale-[0.98] transition"
+                          className="w-full py-3 rounded-xl bg-gradient-to-r from-volcano-orange to-volcano-main text-white font-black text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition"
                         >
-                          🎮 MULAI PERMAINAN (START)
+                          Mulai Permainan
                         </button>
                         <button
                           onClick={() => setShowInstructions(!showInstructions)}
-                          className="w-full py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 font-bold text-xs transition"
+                          className="w-full py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 font-bold text-xs transition"
                         >
-                          📖 Petunjuk & Kontrol
+                          Petunjuk Kontrol
                         </button>
                       </div>
                     </div>
@@ -1412,16 +1419,16 @@ export default function GamePage() {
 
                 {/* 2. INSTRUCTIONS MODAL */}
                 {showInstructions && gameState === "MENU" && (
-                  <div className="absolute inset-0 bg-black/90 p-5 flex flex-col justify-between z-30 text-left">
-                    <div className="space-y-3 overflow-y-auto pr-1 text-xs">
+                  <div className="absolute inset-0 bg-black/95 p-5 flex flex-col justify-between z-30 text-left max-h-full overflow-y-auto">
+                    <div className="space-y-3 text-xs">
                       <h3 className="text-sm font-bold text-volcano-sand border-b border-white/10 pb-2">
-                        📖 Petunjuk & Kontrol Langsung
+                        Petunjuk Kontrol Langsung
                       </h3>
-                      <div className="space-y-1.5 text-white/80">
-                        <p><b>📱 Mobile Direct Touch:</b> Sentuh/geser jari langsung di layar Canvas untuk menggerakkan YOTA!</p>
-                        <p><b>🎮 Desktop:</b> Gunakan [A] / [D] atau Panah Kiri/Kanan.</p>
-                        <p><b>🏕️ Checkpoint Evakuasi:</b> Capai Posko 250m & 500m untuk bonus poin, pemulihan perisai, dan mundurkan lava!</p>
-                        <p><b>⚡ Dynamic Lava Surge:</b> Lava HANYA meluap saat menabrak rintangan atau terjadi sirine erupsi.</p>
+                      <div className="space-y-2 text-white/80">
+                        <p><b>Mobile Direct Touch:</b> Sentuh/geser jari langsung di layar Canvas untuk menggerakkan YOTA!</p>
+                        <p><b>Desktop:</b> Gunakan [A] / [D] atau Panah Kiri/Kanan.</p>
+                        <p><b>Checkpoint Evakuasi:</b> Capai Posko 250m & 500m untuk bonus poin, pemulihan perisai, dan mundurkan lava!</p>
+                        <p><b>Dynamic Lava Surge:</b> Lava HANYA meluap saat menabrak rintangan atau terjadi sirine erupsi.</p>
                       </div>
                     </div>
                     <button
@@ -1437,7 +1444,7 @@ export default function GamePage() {
                 {gameState === "COUNTDOWN" && (
                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm grid place-items-center z-20">
                     <div className="text-center animate-bounce">
-                      <div className="text-7xl font-black text-volcano-sand drop-shadow-lg">
+                      <div className="text-6xl font-black text-volcano-sand drop-shadow-lg">
                         {countdown}
                       </div>
                       <div className="text-xs uppercase tracking-widest text-white/80 mt-2 font-bold">
@@ -1449,30 +1456,29 @@ export default function GamePage() {
 
                 {/* 4. PAUSE OVERLAY */}
                 {gameState === "PAUSED" && (
-                  <div className="absolute inset-0 bg-black/85 backdrop-blur-md p-6 flex flex-col items-center justify-center text-center z-20 space-y-4">
-                    <div className="text-4xl">⏸</div>
-                    <h3 className="text-xl font-bold text-white">Permainan Dijeda</h3>
-                    <div className="w-full max-w-xs space-y-2 pt-2">
+                  <div className="absolute inset-0 bg-black/85 backdrop-blur-md p-5 flex flex-col items-center justify-center text-center z-20 space-y-3 max-h-full overflow-y-auto">
+                    <h3 className="text-lg font-bold text-white">Permainan Dijeda</h3>
+                    <div className="w-full max-w-xs space-y-2 pt-1">
                       <button
                         onClick={() => {
                           setGameState("PLAYING");
                           lastTimeRef.current = performance.now();
                         }}
-                        className="w-full py-3 rounded-xl bg-volcano-orange font-bold text-xs text-white transition"
+                        className="w-full py-2.5 rounded-xl bg-volcano-orange font-bold text-xs text-white transition"
                       >
-                        ▶️ Lanjutkan Bermain
+                        Lanjutkan Bermain
                       </button>
                       <button
                         onClick={startCountdown}
                         className="w-full py-2.5 rounded-xl bg-white/10 font-bold text-xs text-white transition"
                       >
-                        🔄 Mulai Ulang
+                        Mulai Ulang
                       </button>
                       <button
                         onClick={() => setGameState("MENU")}
                         className="w-full py-2.5 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs transition"
                       >
-                        🚪 Keluar ke Menu
+                        Keluar ke Menu
                       </button>
                     </div>
                   </div>
@@ -1480,19 +1486,19 @@ export default function GamePage() {
 
                 {/* 5. GAME OVER OVERLAY */}
                 {gameState === "GAME_OVER" && (
-                  <div className="absolute inset-0 bg-volcano-dark/95 backdrop-blur-md p-5 flex flex-col items-center justify-between text-center z-20">
-                    <div className="my-auto space-y-3 w-full flex flex-col items-center">
-                      <div className="relative size-14 p-2 rounded-2xl bg-rose-500/20 border border-rose-500/40 shadow-xl overflow-hidden flex items-center justify-center">
-                        <Image src="/maskot.webp" alt="Yota Defeated" width={48} height={48} className="object-contain grayscale" />
+                  <div className="absolute inset-0 bg-volcano-dark/95 backdrop-blur-md p-4 sm:p-5 flex flex-col items-center justify-between text-center z-20 max-h-full overflow-y-auto">
+                    <div className="my-auto space-y-2.5 w-full flex flex-col items-center">
+                      <div className="relative size-12 p-2 rounded-2xl bg-rose-500/20 border border-rose-500/40 shadow-xl overflow-hidden flex items-center justify-center">
+                        <Image src="/maskot.webp" alt="Yota Defeated" width={40} height={40} className="object-contain grayscale" />
                       </div>
 
                       <div>
                         <span className="text-[10px] uppercase font-bold text-rose-400 tracking-wider">Permainan Berakhir</span>
-                        <h2 className="text-2xl font-extrabold text-white mt-0.5">GAME OVER</h2>
-                        <p className="text-xs text-rose-200 mt-1 font-semibold">{gameOverCause}</p>
+                        <h2 className="text-xl font-extrabold text-white mt-0.5">GAME OVER</h2>
+                        <p className="text-xs text-rose-200 mt-0.5 font-semibold">{gameOverCause}</p>
                       </div>
 
-                      <div className="w-full p-3 rounded-2xl bg-black/50 border border-white/10 space-y-1.5 text-xs">
+                      <div className="w-full p-2.5 rounded-2xl bg-black/50 border border-white/10 space-y-1 text-xs">
                         <div className="flex justify-between items-center text-white/70">
                           <span>Skor Akhir:</span>
                           <span className="font-bold text-amber-300 text-sm">{score} Poin</span>
@@ -1502,28 +1508,28 @@ export default function GamePage() {
                           <span className="font-bold text-sky-300">{distance} Meter</span>
                         </div>
                         <div className="flex justify-between items-center text-white/70 border-t border-white/10 pt-1">
-                          <span>High Score:</span>
+                          <span>Top Score:</span>
                           <span className="font-bold text-amber-400">{highScore} Poin</span>
                         </div>
                       </div>
 
-                      <div className="w-full p-2.5 rounded-xl bg-volcano-orange/15 border border-volcano-orange/30 text-left text-[11px] text-white/90 space-y-1">
-                        <div className="font-bold text-volcano-sand">💡 Mitigasi Bencana BPBD:</div>
+                      <div className="w-full p-2 rounded-xl bg-volcano-orange/15 border border-volcano-orange/30 text-left text-[11px] text-white/90 space-y-0.5">
+                        <div className="font-bold text-volcano-sand">Mitigasi BPBD:</div>
                         <p className="text-white/80 leading-snug">{mitigationTip}</p>
                       </div>
 
-                      <div className="w-full space-y-2 pt-1">
+                      <div className="w-full space-y-1.5 pt-1">
                         <button
                           onClick={startCountdown}
-                          className="w-full py-3 rounded-xl bg-gradient-to-r from-volcano-orange to-volcano-main text-white font-bold text-xs shadow-lg transition"
+                          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-volcano-orange to-volcano-main text-white font-bold text-xs shadow-lg transition"
                         >
-                          🔄 Main Lagi (PLAY AGAIN)
+                          Main Lagi
                         </button>
                         <button
                           onClick={() => setGameState("MENU")}
-                          className="w-full py-2.5 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20 transition"
+                          className="w-full py-2 rounded-xl bg-white/10 text-white font-bold text-xs hover:bg-white/20 transition"
                         >
-                          🏠 Menu Utama
+                          Menu Utama
                         </button>
                       </div>
                     </div>
@@ -1541,31 +1547,31 @@ export default function GamePage() {
               )}
 
               {/* OPTIONAL TOUCH CONTROLLER TOGGLE ON MOBILE */}
-              <div className="w-full p-2.5 bg-black/90 border-t border-white/10 flex flex-col items-center lg:hidden">
+              <div className="w-full p-2 bg-black/90 border-t border-white/10 flex flex-col items-center lg:hidden">
                 <button
                   onClick={() => setUseTouchButtons(!useTouchButtons)}
-                  className="text-[10px] text-white/50 hover:text-white pb-1 font-bold"
+                  className="text-[10px] text-white/50 hover:text-white pb-0.5 font-bold"
                 >
-                  {useTouchButtons ? "👆 Sembunyikan Tombol (Mode Sentuh Langsung Screen)" : "🎮 Tampilkan Tombol Virtual Kiri/Kanan"}
+                  {useTouchButtons ? "Sembunyikan Tombol Virtual" : "Tampilkan Tombol Virtual Kiri/Kanan"}
                 </button>
 
                 {useTouchButtons && (
-                  <div className="w-full grid grid-cols-2 gap-3 pt-1">
+                  <div className="w-full grid grid-cols-2 gap-2 pt-1">
                     <button
                       onPointerDown={() => setIsLeftPressed(true)}
                       onPointerUp={() => setIsLeftPressed(false)}
                       onPointerLeave={() => setIsLeftPressed(false)}
-                      className="py-3.5 rounded-2xl bg-white/10 active:bg-volcano-orange text-white font-black text-base text-center select-none touch-none"
+                      className="py-3 rounded-xl bg-white/10 active:bg-volcano-orange text-white font-black text-sm text-center select-none touch-none"
                     >
-                      ◀ KIRI
+                      KIRI
                     </button>
                     <button
                       onPointerDown={() => setIsRightPressed(true)}
                       onPointerUp={() => setIsRightPressed(false)}
                       onPointerLeave={() => setIsRightPressed(false)}
-                      className="py-3.5 rounded-2xl bg-white/10 active:bg-volcano-orange text-white font-black text-base text-center select-none touch-none"
+                      className="py-3 rounded-xl bg-white/10 active:bg-volcano-orange text-white font-black text-sm text-center select-none touch-none"
                     >
-                      KANAN ▶
+                      KANAN
                     </button>
                   </div>
                 )}
@@ -1574,15 +1580,13 @@ export default function GamePage() {
             </div>
           </div>
 
-          {/* ======================================================== */}
           {/* DESKTOP SIDEBAR RIGHT: EXPANDED CHALLENGING ACHIEVEMENTS */}
-          {/* ======================================================== */}
           <div className="hidden lg:flex lg:col-span-3 flex-col gap-4">
             
             {/* Achievements Card with Tiers */}
             <div className="p-4 rounded-3xl bg-white/5 border border-white/10 space-y-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand flex items-center justify-between">
-                <span>🎖️ Pencapaian (10 Badges)</span>
+                <span>Pencapaian Badges</span>
                 <span className="text-[10px] font-mono text-amber-400">
                   {achievements.filter((a) => a.unlocked).length} / {achievements.length}
                 </span>
@@ -1606,7 +1610,7 @@ export default function GamePage() {
                           : "bg-white/5 border-white/10 text-white/35 opacity-55"
                       }`}
                     >
-                      <div className="text-2xl">{ach.icon}</div>
+                      <div className="px-2 py-1 rounded-md bg-white/10 font-mono font-bold text-xs">{ach.tag}</div>
                       <div className="min-w-0 flex-1">
                         <div className="font-bold text-xs flex items-center justify-between gap-1">
                           <span className="truncate">{ach.title}</span>
@@ -1622,8 +1626,8 @@ export default function GamePage() {
 
             {/* Desktop Keyboard Controls Guide Card */}
             <div className="p-4 rounded-3xl bg-white/5 border border-white/10 space-y-3 text-xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand flex items-center gap-2">
-                ⌨️ Panduan Keyboard
+              <h3 className="text-xs font-bold uppercase tracking-wider text-volcano-sand">
+                Panduan Kontrol
               </h3>
               <div className="space-y-2 text-white/80">
                 <div className="flex items-center justify-between">
@@ -1646,7 +1650,7 @@ export default function GamePage() {
         </div>
 
         {/* Back Link to WebGIS Home */}
-        <div className="text-center pt-2">
+        <div className="text-center pt-1">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-xs font-bold text-white/60 hover:text-white transition"
