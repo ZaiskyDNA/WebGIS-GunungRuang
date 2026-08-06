@@ -5,7 +5,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Polygon, Popup, Tooltip, LayersControl } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { supabase } from '../lib/supabase';
 
 // --- DATA STATIK ---
 const AIRPORTS = [
@@ -39,7 +38,6 @@ export default function MapPraBencana() {
   const volcanoPosition: [number, number] = [2.30597, 125.36680];
   
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   // ── Konfigurasi Ikon
   const icons = useMemo(() => {
@@ -64,7 +62,6 @@ export default function MapPraBencana() {
   ] as [number, number][], []);
 
   useEffect(() => {
-    setIsMounted(true);
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => setUserLocation([pos.coords.latitude, pos.coords.longitude]),
@@ -73,7 +70,7 @@ export default function MapPraBencana() {
     }
   }, []);
 
-  if (!isMounted || !icons) {
+  if (!icons) {
     return <div className="w-full h-[450px] md:h-[650px] rounded-xl bg-gray-100 animate-pulse flex items-center justify-center">Memuat Peta Regional...</div>;
   }
 

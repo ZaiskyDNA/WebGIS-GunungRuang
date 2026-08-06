@@ -7,9 +7,19 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { supabase } from '../lib/supabase';
 
+interface EvacuationPoint {
+  id: string;
+  lat: number;
+  lng: number;
+  name: string;
+  capacity: number;
+  current_refugees: number;
+  status_logistik: string;
+}
+
 export default function MapTanggap() {
   const volcanoPosition: [number, number] = [2.30597, 125.36680];
-  const [points, setPoints] = useState<any[]>([]);
+  const [points, setPoints] = useState<EvacuationPoint[]>([]);
   
   // State untuk menyimpan HANYA SATU radius bahaya
   const [radiusBahaya, setRadiusBahaya] = useState(7000);
@@ -101,14 +111,14 @@ export default function MapTanggap() {
           <Marker key={p.id} position={[p.lat, p.lng]} icon={icons.posko}>
             <Popup>
               <div className="text-sm min-w-[200px] font-sans">
-                <strong className="text-[#4a1511] block mb-2 text-base border-b pb-1">{p.name}</strong>
+                <strong className="text-volcano-dark block mb-2 text-base border-b pb-1">{p.name}</strong>
                 <div className="text-gray-600 mb-1 text-xs">👥 Pengungsi: <span className="font-bold">{p.current_refugees} / {p.capacity}</span></div>
                 <div className={`text-xs font-bold mb-4 px-2 py-1 rounded inline-block ${p.status_logistik === 'Kritis' ? 'bg-red-50 text-red-600' : p.status_logistik === 'Menipis' ? 'bg-orange-50 text-orange-600' : 'bg-emerald-50 text-emerald-600'}`}>
                   Logistik: {p.status_logistik}
                 </div>
                 <a 
                   href={`/tanggap-darurat/posko/${p.id}`}
-                  className="block w-full text-center bg-[#4a1511] hover:bg-[#6b201a] text-white py-2 rounded-lg font-bold text-xs transition-colors shadow-sm"
+                  className="block w-full text-center bg-volcano-main hover:bg-volcano-dark text-white py-2 rounded-lg font-bold text-xs transition-colors shadow-sm"
                 >
                   Lihat Lebih Detail
                 </a>
