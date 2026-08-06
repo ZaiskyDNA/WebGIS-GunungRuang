@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 
 const navigation = [
   { href: "/", label: "Mitigasi" },
@@ -13,13 +14,16 @@ const navigation = [
 
 function BrandMark() {
   return (
-    <span className="grid size-10 place-items-center rounded-2xl bg-volcano-sand text-volcano-dark shadow-sm" aria-hidden="true">
-      <svg viewBox="0 0 32 32" className="size-6" fill="none">
-        <path d="M4 25 13.2 9.5a3.2 3.2 0 0 1 5.5 0L28 25H4Z" fill="currentColor" opacity=".32" />
-        <path d="m9 25 6.1-10.3a1 1 0 0 1 1.8 0L23 25H9Z" fill="currentColor" />
-        <path d="m13.5 18 2.5-2.8 2.5 2.8" stroke="#EED9B9" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </span>
+    <div className="relative size-10 overflow-hidden rounded-2xl border border-volcano-sand/40 bg-volcano-sand/20 shadow-sm shrink-0 flex items-center justify-center">
+      <Image
+        src="/maskot.webp"
+        alt="Maskot YOTA"
+        width={40}
+        height={40}
+        className="object-cover object-center size-full"
+        priority
+      />
+    </div>
   );
 }
 
