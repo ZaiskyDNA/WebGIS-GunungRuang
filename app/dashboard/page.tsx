@@ -1,9 +1,19 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabase'; 
 
+interface PoskoOption {
+  id: string;
+  name: string;
+}
+
 export default function Dashboard() {
+  const router = useRouter();
+  // ── STATE UNTUK AUTH CHECK ──
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+
   // ── STATE UNTUK TAB NAVIGASI ──
   const [activeTab, setActiveTab] = useState<'admin' | 'relawan'>('admin');
 
@@ -13,7 +23,7 @@ export default function Dashboard() {
   const [isUpdatingAdmin, setIsUpdatingAdmin] = useState(false);
 
   // ── STATE RELAWAN (UPDATE POSKO) ──
-  const [poskos, setPoskos] = useState<any[]>([]);
+  const [poskos, setPoskos] = useState<PoskoOption[]>([]);
   const [selectedPoskoId, setSelectedPoskoId] = useState<string>('');
   const [poskoData, setPoskoData] = useState({
     current_refugees: 0,
@@ -23,6 +33,19 @@ export default function Dashboard() {
     status_logistik: 'Aman'
   });
   const [isUpdatingRelawan, setIsUpdatingRelawan] = useState(false);
+
+  // ── CEK AUTENTIKASI ──
+  useEffect(() => {
+    async function checkAuth() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace('/login');
+      } else {
+        setIsAuthChecked(true);
+      }
+    }
+    checkAuth();
+  }, [router]);
 
   // ── FETCH DATA AWAL ──
   useEffect(() => {
@@ -113,12 +136,20 @@ export default function Dashboard() {
     setIsUpdatingRelawan(false);
   };
 
+  if (!isAuthChecked) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-volcano-dark font-bold animate-pulse">Memverifikasi akses...</div>
+      </main>
+    );
+  }
+
   return (
-    <main className="min-h-screen bg-[#faf8f5] py-8 md:py-12">
+    <main className="min-h-screen py-8 md:py-12">
       <div className="max-w-5xl mx-auto px-4 md:px-8">
         
         {/* HEADER DASBOR */}
-        <div className="bg-[#4a1511] text-white p-8 rounded-[32px] shadow-lg flex flex-col md:flex-row justify-between items-center gap-6 mb-8 relative overflow-hidden">
+        <div className="yota-hero p-8 rounded-[32px] flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 rounded-l-full translate-x-1/4 scale-150 pointer-events-none"></div>
           <div className="relative z-10 text-center md:text-left">
             <h1 className="text-3xl font-extrabold mb-2 tracking-tight">Pusat Kendali Operasional</h1>
@@ -127,13 +158,13 @@ export default function Dashboard() {
           <div className="relative z-10 flex gap-2 bg-white/10 p-2 rounded-2xl border border-white/20 backdrop-blur-sm">
             <button 
               onClick={() => setActiveTab('admin')}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'admin' ? 'bg-white text-[#4a1511] shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'admin' ? 'bg-white text-volcano-dark shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
             >
               Panel Admin (BPBD)
             </button>
             <button 
               onClick={() => setActiveTab('relawan')}
-              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'relawan' ? 'bg-white text-[#4a1511] shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
+              className={`px-6 py-2 rounded-xl text-sm font-bold transition-colors ${activeTab === 'relawan' ? 'bg-white text-volcano-dark shadow-md' : 'text-gray-300 hover:bg-white/10'}`}
             >
               Panel Relawan Lapangan
             </button>
@@ -150,7 +181,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">🌋</span>
-                <h2 className="text-xl font-bold text-[#4a1511]">Kendali Tingkat Aktivitas Gunung Ruang</h2>
+                <h2 className="text-xl font-bold text-volcano-dark">Kendali Tingkat Aktivitas Gunung Ruang</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -164,7 +195,7 @@ export default function Dashboard() {
                     key={btn.level}
                     disabled={isUpdatingAdmin}
                     onClick={() => handleUpdateStatus(btn.level, btn.name, btn.desc)}
-                    className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 text-white transition-all transform active:scale-95 ${btn.color} ${status.level === btn.level ? 'ring-4 ring-offset-2 ring-[#4a1511] shadow-lg scale-105' : 'opacity-80'}`}
+                    className={`p-4 rounded-2xl flex flex-col items-center justify-center gap-2 text-white transition-all transform active:scale-95 ${btn.color} ${status.level === btn.level ? 'ring-4 ring-offset-2 ring-volcano-dark shadow-lg scale-105' : 'opacity-80'}`}
                   >
                     <span className="text-xl font-black">Level {btn.level}</span>
                     <span className="text-xs font-bold uppercase tracking-widest">{btn.name}</span>
@@ -173,7 +204,7 @@ export default function Dashboard() {
               </div>
               <div className="text-center p-3 bg-gray-50 rounded-xl border border-gray-200">
                 <span className="text-xs text-gray-500 font-bold uppercase tracking-widest">Status Aktif di Website:</span>
-                <p className="text-lg font-black text-[#4a1511]">Level {status.level} — {status.name}</p>
+                <p className="text-lg font-black text-volcano-dark">Level {status.level} — {status.name}</p>
               </div>
             </div>
 
@@ -181,7 +212,7 @@ export default function Dashboard() {
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100">
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-2xl">🎯</span>
-                <h2 className="text-xl font-bold text-[#4a1511]">Kendali Radius Bahaya (Area Wajib Kosong)</h2>
+                <h2 className="text-xl font-bold text-volcano-dark">Kendali Radius Bahaya (Area Wajib Kosong)</h2>
               </div>
               <div className="max-w-xl">
                 <label className="text-xs font-bold text-red-600 uppercase tracking-widest mb-2 block">
@@ -218,7 +249,7 @@ export default function Dashboard() {
           <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 animate-fade-in-down">
             <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
               <span className="text-2xl">📦</span>
-              <h2 className="text-xl font-bold text-[#4a1511]">Formulir Pelaporan Relawan</h2>
+              <h2 className="text-xl font-bold text-volcano-dark">Formulir Pelaporan Relawan</h2>
             </div>
 
             {/* Pilih Posko */}
@@ -227,7 +258,7 @@ export default function Dashboard() {
               <select 
                 value={selectedPoskoId}
                 onChange={(e) => setSelectedPoskoId(e.target.value)}
-                className="w-full bg-[#faf8f5] border border-gray-200 rounded-xl p-3 text-[#4a1511] font-bold focus:ring-2 focus:ring-[#4a1511] outline-none cursor-pointer"
+                className="w-full bg-canvas border border-gray-200 rounded-xl p-3 text-volcano-dark font-bold focus:ring-2 focus:ring-volcano-orange outline-none cursor-pointer"
               >
                 <option value="" disabled>-- Pilih Posko Anda --</option>
                 {poskos.map(p => (
@@ -242,7 +273,7 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Data Pengungsi */}
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
-                    <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-3 block">👥 Jumlah Pengungsi Saat Ini</label>
+                    <label className="text-xs font-bold text-volcano-dark uppercase tracking-widest mb-3 block">👥 Jumlah Pengungsi Saat Ini</label>
                     <input 
                       type="number" 
                       value={poskoData.current_refugees}
@@ -253,7 +284,7 @@ export default function Dashboard() {
 
                   {/* Status Logistik Keseluruhan */}
                   <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
-                    <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-3 block">🏷️ Status Logistik Umum</label>
+                    <label className="text-xs font-bold text-volcano-dark uppercase tracking-widest mb-3 block">🏷️ Status Logistik Umum</label>
                     <select 
                       value={poskoData.status_logistik}
                       onChange={(e) => setPoskoData({...poskoData, status_logistik: e.target.value})}
@@ -268,7 +299,7 @@ export default function Dashboard() {
 
                 {/* Detail Inventaris Logistik */}
                 <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200">
-                  <label className="text-xs font-bold text-[#4a1511] uppercase tracking-widest mb-4 block">📦 Pembaruan Stok Logistik</label>
+                  <label className="text-xs font-bold text-volcano-dark uppercase tracking-widest mb-4 block">📦 Pembaruan Stok Logistik</label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <label className="text-[11px] text-gray-500 font-bold mb-1 block">Beras / Makanan (Kg)</label>
@@ -288,7 +319,7 @@ export default function Dashboard() {
                 <button 
                   onClick={handleUpdatePosko}
                   disabled={isUpdatingRelawan}
-                  className="w-full bg-[#4a1511] hover:bg-[#6b201a] text-white font-bold py-4 rounded-xl transition shadow-md mt-4"
+                  className="w-full bg-volcano-main hover:bg-volcano-dark text-white font-bold py-4 rounded-xl transition shadow-md mt-4"
                 >
                   {isUpdatingRelawan ? "Mengirim Laporan..." : "Simpan & Publikasikan Laporan Posko"}
                 </button>
