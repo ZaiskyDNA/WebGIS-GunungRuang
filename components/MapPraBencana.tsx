@@ -39,25 +39,25 @@ export default function MapPraBencana() {
   
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
 
-  // ── Konfigurasi Ikon (DivIcon berbasis CSS — tanpa CDN eksternal)
+  // ── Konfigurasi Ikon (Clean DivIcon tanpa emoji)
   const icons = useMemo(() => {
     if (typeof window === 'undefined') return null;
 
-    const makeIcon = (color: string, label: string) => L.divIcon({
+    const makeIcon = (color: string) => L.divIcon({
       className: '',
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
-      popupAnchor: [0, -28],
-      html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:12px;line-height:1">${label}</span></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 22],
+      popupAnchor: [0, -22],
+      html: `<div style="width:20px;height:20px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;border-radius:50%;background:#fff"></div></div>`,
     });
 
     return {
-      volcano: makeIcon('#dc2626', '🌋'),
-      airport: makeIcon('#1f2937', '✈'),
-      dropPoint: makeIcon('#2563eb', '📦'),
-      centralShelter: makeIcon('#eab308', '🏢'),
-      tempShelter: makeIcon('#16a34a', '⛺'),
-      user: makeIcon('#7c3aed', '📍'),
+      volcano: makeIcon('#dc2626'),
+      airport: makeIcon('#1f2937'),
+      dropPoint: makeIcon('#2563eb'),
+      centralShelter: makeIcon('#eab308'),
+      tempShelter: makeIcon('#16a34a'),
+      user: makeIcon('#7c3aed'),
     };
   }, []);
   
@@ -128,7 +128,7 @@ export default function MapPraBencana() {
         {/* 1. Bandara Terdampak */}
         {AIRPORTS.map((ap, i) => (
           <Marker key={`ap-${i}`} position={[ap.lat, ap.lng]} icon={icons.airport}>
-            <Popup><strong>✈️ {ap.name}</strong><br/>Status: Terdampak Penerbangan</Popup>
+            <Popup><strong>{ap.name}</strong><br/>Status: Terdampak Penerbangan</Popup>
             <Tooltip direction="top">Bandara</Tooltip>
           </Marker>
         ))}
@@ -136,7 +136,7 @@ export default function MapPraBencana() {
         {/* 2. Drop Point Manado */}
         {DROP_POINTS.map((dp, i) => (
           <Marker key={`dp-${i}`} position={[dp.lat, dp.lng]} icon={icons.dropPoint}>
-            <Popup><strong>📦 {dp.name}</strong><br/>Pusat Distribusi Bantuan Utama</Popup>
+            <Popup><strong>{dp.name}</strong><br/>Pusat Distribusi Bantuan Utama</Popup>
           </Marker>
         ))}
 
@@ -148,7 +148,7 @@ export default function MapPraBencana() {
             icon={gp.type === 'central' ? icons.centralShelter : icons.tempShelter}
           >
             <Popup>
-              <strong>{gp.type === 'central' ? '🏢' : '⛺'} {gp.name}</strong><br/>
+              <strong>{gp.name}</strong><br/>
               Elevasi: {gp.elev}<br/>
               Kategori: {gp.type === 'central' ? 'Pusat' : 'Sementara'}
             </Popup>
@@ -157,7 +157,7 @@ export default function MapPraBencana() {
 
         {/* Gunung Ruang */}
         <Marker position={volcanoPosition} icon={icons.volcano}>
-          <Popup><strong>🌋 Gunung Ruang</strong><br/>Pusat Erupsi</Popup>
+          <Popup><strong>Gunung Ruang</strong><br/>Pusat Erupsi</Popup>
         </Marker>
 
         {/* Lokasi User */}

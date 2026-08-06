@@ -27,17 +27,17 @@ export default function MapTanggap() {
   const icons = useMemo(() => {
     if (typeof window === 'undefined') return null;
 
-    const makeIcon = (color: string, label: string) => L.divIcon({
+    const makeIcon = (color: string) => L.divIcon({
       className: '',
-      iconSize: [28, 28],
-      iconAnchor: [14, 28],
-      popupAnchor: [0, -28],
-      html: `<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:12px;line-height:1">${label}</span></div>`,
+      iconSize: [22, 22],
+      iconAnchor: [11, 22],
+      popupAnchor: [0, -22],
+      html: `<div style="width:20px;height:20px;border-radius:50% 50% 50% 0;background:${color};transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;border-radius:50%;background:#fff"></div></div>`,
     });
 
     return {
-      volcano: makeIcon('#dc2626', '🌋'),
-      posko: makeIcon('#2563eb', '🏕'),
+      volcano: makeIcon('#dc2626'),
+      posko: makeIcon('#2563eb'),
     };
   }, []);
 
@@ -104,7 +104,7 @@ export default function MapTanggap() {
 
         {/* Marker Gunung Ruang */}
         <Marker position={volcanoPosition} icon={icons.volcano}>
-          <Popup><strong>🌋 Pusat Erupsi Gunung Ruang</strong></Popup>
+          <Popup><strong>Pusat Erupsi Gunung Ruang</strong></Popup>
         </Marker>
 
         {/* Marker Posko Evakuasi */}
