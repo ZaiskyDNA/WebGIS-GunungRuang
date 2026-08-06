@@ -5,9 +5,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import {
   SimulationState,
-  createInitialState,
   updateSimulation,
-  triggerEruption,
 } from "../lib/simulation";
 
 interface VolcanoSceneProps {
@@ -69,7 +67,10 @@ export default function VolcanoScene({ simState, onStateChange }: VolcanoScenePr
   } | null>(null);
 
   const simStateRef = useRef(simState);
-  simStateRef.current = simState;
+
+  useEffect(() => {
+    simStateRef.current = simState;
+  }, [simState]);
 
   // Build volcano geometry with procedural noise
   const buildVolcano = useCallback((scene: THREE.Scene) => {
@@ -348,11 +349,11 @@ export default function VolcanoScene({ simState, onStateChange }: VolcanoScenePr
     scene.add(particles.emberMesh);
 
     const clock = new THREE.Clock();
-    let lavaCount = 0;
-    let ashCount = 0;
-    let smokeCount = 0;
-    let emberCount = 0;
-    let lavaFlowTime = 0;
+    const lavaCount = 0;
+    const ashCount = 0;
+    const smokeCount = 0;
+    const emberCount = 0;
+    const lavaFlowTime = 0;
 
     const refs = {
       scene, camera, renderer, controls,

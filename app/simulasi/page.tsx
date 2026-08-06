@@ -54,7 +54,7 @@ export default function GunungRuangPage() {
   return (
     <div style={{
       width: "100vw",
-      height: "100vh",
+      height: "calc(100dvh - 4.5rem)",
       overflow: "hidden",
       background: "#050208",
       position: "relative",
