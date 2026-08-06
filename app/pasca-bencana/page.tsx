@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { SimulationState, createInitialState, triggerEruption } from "../../lib/simulation";
 import Controls from "../../components/ui/Controls";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
@@ -43,18 +44,18 @@ export default function PascaBencana() {
   const handleViscosityChange = useCallback((v: number) => setSimState((prev) => ({ ...prev, viscosity: v })), []);
 
   return (
-    <main className="min-h-screen bg-[#faf8f5] py-8 md:py-12">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-8 md:space-y-12">
+    <main className="min-h-screen py-8 md:py-12">
+      <div className="yota-shell space-y-8 md:space-y-12">
         
         {/* =========================================
             HEADER HALAMAN
             ========================================= */}
         <div>
-          <div className="bg-[#4a1511] text-white p-8 md:p-10 rounded-[32px] shadow-lg relative overflow-hidden flex items-center">
+          <div className="yota-hero p-8 md:p-10 rounded-[32px] flex items-center">
             <div className="absolute top-0 right-0 w-1/3 h-full bg-white/5 rounded-l-full translate-x-1/4 scale-150"></div>
             <div className="relative z-10 max-w-3xl">
               <div className="inline-block bg-white/10 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest text-red-200 border border-red-300/20 mb-4">
-                Fase Pemulihan & Evaluasi
+                YOTA · Pemulihan & Evaluasi
               </div>
               <h1 className="text-3xl md:text-5xl font-extrabold mb-4 tracking-tight">
                 Arsip Historis & Analitik Erupsi
@@ -73,7 +74,7 @@ export default function PascaBencana() {
               { value: 'Rp 300 M+', label: 'ESTIMASI KERUGIAN' },
             ].map((stat, i) => (
               <div key={i} className="bg-white py-6 md:py-8 px-4 rounded-2xl shadow-sm border border-gray-100 text-center transition-transform hover:-translate-y-1">
-                <div className="text-2xl md:text-4xl font-black text-[#4a1511] mb-2">{stat.value}</div>
+                <div className="text-2xl md:text-4xl font-black text-volcano-dark mb-2">{stat.value}</div>
                 <div className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest">{stat.label}</div>
               </div>
             ))}
@@ -88,7 +89,7 @@ export default function PascaBencana() {
           {/* Grafik Bar VEI */}
           <div className="lg:col-span-7 bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col">
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-[#4a1511] flex items-center gap-2 mb-1">
+              <h2 className="text-xl font-bold text-volcano-dark flex items-center gap-2 mb-1">
                 <span>📊</span> Jejak Historis Indeks Daya Ledak (1808 - 2024)
               </h2>
               <p className="text-sm text-gray-500">Grafik riwayat letusan terkonfirmasi Gunung Ruang berdasarkan skala VEI.</p>
@@ -103,12 +104,12 @@ export default function PascaBencana() {
                   <Tooltip 
                     cursor={{ fill: '#f3f4f6' }}
                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                    formatter={(value: any) => [`${value}`, 'VEI']}
-                    labelStyle={{ fontWeight: 'bold', color: '#4a1511', marginBottom: '4px' }}
+                    formatter={(value) => [`${value}`, 'VEI']}
+                    labelStyle={{ fontWeight: 'bold', color: '#5E0006', marginBottom: '4px' }}
                   />
                   <Bar dataKey="vei" radius={[6, 6, 0, 0]} maxBarSize={40} isAnimationActive={false}>
                     {veiHistoryData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.vei === 4 ? '#9B0F06' : entry.vei === 3 ? '#D53E0F' : '#eab308'} />
+                      <Cell key={`cell-${index}`} fill={entry.vei === 4 ? '#9B0F06' : entry.vei === 3 ? '#D53E0F' : '#EED9B9'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -116,16 +117,16 @@ export default function PascaBencana() {
             </div>
             
             <div className="mt-4 flex justify-center gap-4 text-[10px] md:text-xs font-bold text-gray-500 uppercase tracking-widest">
-              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#eab308] rounded-sm"></div> VEI 1-2</div>
-              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#D53E0F] rounded-sm"></div> VEI 3</div>
-              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-[#9B0F06] rounded-sm"></div> VEI 4</div>
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-volcano-sand rounded-sm"></div> VEI 1-2</div>
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-volcano-orange rounded-sm"></div> VEI 3</div>
+              <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-volcano-main rounded-sm"></div> VEI 4</div>
             </div>
           </div>
 
           {/* Kartu Gambar Edukasi VEI (Baru) */}
           <div className="lg:col-span-5 bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-gray-100 flex flex-col items-center justify-center relative overflow-hidden">
             <div className="w-full mb-4">
-              <h2 className="text-xl md:text-2xl font-bold text-[#4a1511] tracking-tight">
+              <h2 className="text-xl md:text-2xl font-bold text-volcano-dark tracking-tight">
                 Mengenal Skala VEI
               </h2>
               <p className="text-gray-500 text-sm mt-1">Perbandingan volume material erupsi gunung berapi.</p>
@@ -133,13 +134,13 @@ export default function PascaBencana() {
             
             {/* Wadah Gambar veiscala.jpg */}
             <div className="w-full flex-1 relative flex items-center justify-center bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden p-4">
-              <img 
-                src="/veiscala.jpg" 
+              <Image
+                src="/veiscala.jpg"
                 alt="Infografis Skala Volcanic Explosivity Index (VEI)" 
+                width={900}
+                height={600}
+                sizes="(min-width: 1024px) 40vw, 100vw"
                 className="w-full h-full object-contain mix-blend-multiply"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x800?text=Gambar+veiscala.jpg+Belum+Ada';
-                }}
               />
             </div>
           </div>
@@ -148,7 +149,7 @@ export default function PascaBencana() {
         {/* =========================================
             SECTION 2: PEMODELAN FISIKA 3D
             ========================================= */}
-        <div className="bg-[#1a0806] text-white p-6 md:p-10 rounded-[32px] shadow-2xl relative overflow-hidden mt-8">
+        <div className="bg-volcano-dark text-white p-6 md:p-10 rounded-[32px] shadow-2xl relative overflow-hidden mt-8">
           <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-4 space-y-4">
               <div className="inline-block bg-white/10 p-2 px-3 rounded-full text-xs font-bold uppercase tracking-wider text-orange-300 border border-orange-500/30">Modul Simulasi Geofisika</div>
@@ -180,7 +181,7 @@ export default function PascaBencana() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 border-t border-gray-200 pt-12">
           {/* Info Kontak & Sosial Media */}
           <div>
-            <h2 className="text-2xl font-bold text-[#4a1511] mb-4">Pusat Layanan Informasi</h2>
+            <h2 className="text-2xl font-bold text-volcano-dark mb-4">Pusat Layanan Informasi</h2>
             <p className="text-gray-600 text-sm mb-8 leading-relaxed">
               Hubungi kami untuk informasi darurat, donasi logistik, atau layanan evakuasi. Tim posko pusat kami beroperasi 24 jam selama masa tanggap darurat.
             </p>
@@ -190,14 +191,14 @@ export default function PascaBencana() {
                 <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-600 text-xl">📞</div>
                 <div>
                   <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Hotline Darurat</div>
-                  <div className="text-lg font-bold text-[#4a1511]">117 (BNPB) / 119</div>
+                  <div className="text-lg font-bold text-volcano-dark">117 (BNPB) / 119</div>
                 </div>
               </div>
               <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
                 <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-600 text-xl">📧</div>
                 <div>
                   <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">Email Layanan</div>
-                  <div className="text-lg font-bold text-[#4a1511]">posko@ruang.go.id</div>
+                  <div className="text-lg font-bold text-volcano-dark">posko@yota.id</div>
                 </div>
               </div>
             </div>
@@ -205,7 +206,7 @@ export default function PascaBencana() {
 
           {/* Form Evaluasi via FORMSPREE */}
           <div className="bg-white p-6 md:p-8 rounded-[32px] shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold text-[#4a1511] mb-2">Form Evaluasi & Saran</h2>
+            <h2 className="text-xl font-bold text-volcano-dark mb-2">Form Evaluasi & Saran</h2>
             <p className="text-xs text-gray-500 mb-6">Bantu kami meningkatkan layanan informasi website ini dengan memberikan masukan Anda.</p>
             <form action="https://formspree.io/f/mdaylwdv" method="POST" className="space-y-4">
               <div>
@@ -215,7 +216,7 @@ export default function PascaBencana() {
                   name="email" 
                   required 
                   placeholder="nama@email.com" 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#4a1511] outline-none" 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-volcano-orange outline-none"
                 />
               </div>
               <div>
@@ -225,10 +226,10 @@ export default function PascaBencana() {
                   name="message" 
                   required 
                   placeholder="Tuliskan saran atau kendala yang Anda temukan..." 
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-[#4a1511] outline-none resize-none"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-volcano-orange outline-none resize-none"
                 ></textarea>
               </div>
-              <button type="submit" className="w-full bg-[#4a1511] hover:bg-[#6b201a] text-white font-bold py-3.5 rounded-xl transition shadow-md text-sm mt-2">
+              <button type="submit" className="w-full bg-volcano-main hover:bg-volcano-dark text-white font-bold py-3.5 rounded-xl transition shadow-md text-sm mt-2">
                 Kirim Masukan
               </button>
             </form>
